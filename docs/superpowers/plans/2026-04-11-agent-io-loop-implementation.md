@@ -26,7 +26,7 @@
 - Modify: `apps/api/src/data.ts`
 - Modify: `apps/api/src/routes.ts`
 
-- [ ] **Step 1: Write failing API tests**
+- [x] **Step 1: Write failing API tests**
 
 Add tests that:
 
@@ -79,7 +79,7 @@ it("rejects reply writes without tokens and returns 404 for missing reads", asyn
 });
 ```
 
-- [ ] **Step 2: Run API tests and confirm RED**
+- [x] **Step 2: Run API tests and confirm RED**
 
 Run:
 
@@ -89,7 +89,9 @@ pnpm --filter @kunpeng-agent-forum/api test
 
 Expected: fail because the new API routes and data helpers do not exist yet.
 
-- [ ] **Step 3: Implement minimal API data helpers and routes**
+Observed: `pnpm --filter @kunpeng-agent-forum/api test` failed with 404 responses for the new search/read/reply routes before implementation.
+
+- [x] **Step 3: Implement minimal API data helpers and routes**
 
 Implement only the in-memory helpers and endpoints required by the tests. Add a route-local `statusUpdateSchema`:
 
@@ -100,7 +102,7 @@ const statusUpdateSchema = z.object({
 }).strict();
 ```
 
-- [ ] **Step 4: Run API tests and confirm GREEN**
+- [x] **Step 4: Run API tests and confirm GREEN**
 
 Run:
 
@@ -111,7 +113,9 @@ pnpm --filter @kunpeng-agent-forum/api typecheck
 
 Expected: both pass.
 
-- [ ] **Step 5: Commit API slice**
+Observed: API tests passed with 2 files and 8 tests; API typecheck passed.
+
+- [x] **Step 5: Commit API slice**
 
 ```powershell
 git add apps/api
@@ -125,7 +129,7 @@ git commit -m "Add Agent Forum API IO loop"
 - Modify: `apps/cli/src/client.ts`
 - Modify: `apps/cli/src/index.ts`
 
-- [ ] **Step 1: Write failing CLI helper tests**
+- [x] **Step 1: Write failing CLI helper tests**
 
 Add tests that verify:
 
@@ -137,7 +141,7 @@ expect(formatThreadDetail({ thread: { id: "thread_1", slug: "proxy", title: "Pro
   .toContain("Proxy timeout");
 ```
 
-- [ ] **Step 2: Run CLI tests and confirm RED**
+- [x] **Step 2: Run CLI tests and confirm RED**
 
 Run:
 
@@ -147,7 +151,9 @@ pnpm --filter @kunpeng-agent-forum/cli test
 
 Expected: fail because helper functions and formatters do not exist yet.
 
-- [ ] **Step 3: Implement CLI client helpers**
+Observed: `pnpm --filter @kunpeng-agent-forum/cli test` failed because `buildApiUrl`, `createAuthHeaders`, `formatThreadDetail`, and `formatSearchResults` did not exist.
+
+- [x] **Step 3: Implement CLI client helpers**
 
 Add helpers:
 
@@ -160,7 +166,7 @@ formatSearchResults(payload)
 formatThreadDetail(payload)
 ```
 
-- [ ] **Step 4: Implement CLI commands**
+- [x] **Step 4: Implement CLI commands**
 
 Wire commands:
 
@@ -174,7 +180,7 @@ agent-forum mark-solved <idOrSlug> --summary ...
 
 Use `process.exitCode = 1` and `console.error(message)` on failures.
 
-- [ ] **Step 5: Run CLI tests and confirm GREEN**
+- [x] **Step 5: Run CLI tests and confirm GREEN**
 
 Run:
 
@@ -185,7 +191,9 @@ pnpm --filter @kunpeng-agent-forum/cli typecheck
 
 Expected: both pass.
 
-- [ ] **Step 6: Commit CLI slice**
+Observed: CLI tests passed with 1 file and 5 tests; CLI typecheck passed after omitting undefined `body` from `RequestInit`.
+
+- [x] **Step 6: Commit CLI slice**
 
 ```powershell
 git add apps/cli
@@ -197,7 +205,7 @@ git commit -m "Add Agent Forum CLI IO commands"
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-11-agent-io-loop-implementation.md`
 
-- [ ] **Step 1: Run full verification**
+- [x] **Step 1: Run full verification**
 
 Run:
 
@@ -209,7 +217,9 @@ pnpm build
 
 Expected: all pass.
 
-- [ ] **Step 2: Check README attribution**
+Observed: `pnpm test`, `pnpm typecheck`, and `pnpm build` all exited 0.
+
+- [x] **Step 2: Check README attribution**
 
 Run:
 
@@ -219,7 +229,9 @@ Select-String -Path README.md -Pattern "相关链接|主站博客|GitHub 组织|
 
 Expected: all six public attribution markers are present.
 
-- [ ] **Step 3: Commit plan status if updated**
+Observed: all six markers are present in `README.md`.
+
+- [x] **Step 3: Commit plan status if updated**
 
 If checkboxes or notes changed in this plan:
 
