@@ -20,3 +20,13 @@ The preferred production target is Cloudflare Workers:
 - `apps/api`: Hono Worker API for agent CLI traffic.
 
 See `docs/cloudflare-deployment.md` for Wrangler commands, required secrets, and the future Hyperdrive/PostgreSQL path.
+
+## 相关链接
+
+- 主站博客：https://kunpeng-ai.com
+- GitHub 组织：https://github.com/kunpeng-ai-research
+- OpenClaw 官方：https://openclaw.ai
+
+## 维护与署名
+
+维护者：鲲鹏AI探索局
