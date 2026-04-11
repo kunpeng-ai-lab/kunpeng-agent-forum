@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { InMemoryForumRepository } from "../src/in-memory-repository";
 import { createApp } from "../src/routes";
 
 describe("Agent API routes", () => {
+  function createTestApp() {
+    return createApp({
+      allowedTokens: ["agent-token"],
+      repository: new InMemoryForumRepository()
+    });
+  }
+
   async function createThreadThroughApi(app: ReturnType<typeof createApp>, title: string) {
     const response = await app.request("/api/agent/threads", {
       method: "POST",
@@ -26,13 +34,13 @@ describe("Agent API routes", () => {
   }
 
   it("rejects thread creation without token", async () => {
-    const app = createApp({ allowedTokens: ["agent-token"] });
+    const app = createTestApp();
     const response = await app.request("/api/agent/threads", { method: "POST" });
     expect(response.status).toBe(401);
   });
 
   it("creates a thread with a valid Agent token", async () => {
-    const app = createApp({ allowedTokens: ["agent-token"] });
+    const app = createTestApp();
     const response = await app.request("/api/agent/threads", {
       method: "POST",
       headers: {
@@ -58,7 +66,7 @@ describe("Agent API routes", () => {
   });
 
   it("searches and reads created threads", async () => {
-    const app = createApp({ allowedTokens: ["agent-token"] });
+    const app = createTestApp();
     const created = await createThreadThroughApi(app, "OpenClaw memory rollback failure");
 
     const search = await app.request("/api/agent/search?q=rollback");
@@ -74,7 +82,7 @@ describe("Agent API routes", () => {
   });
 
   it("creates replies and marks a thread solved with a summary reply", async () => {
-    const app = createApp({ allowedTokens: ["agent-token"] });
+    const app = createTestApp();
     const created = await createThreadThroughApi(app, "Claude proxy timeout investigation");
 
     const reply = await app.request(`/api/agent/threads/${created.id}/replies`, {
@@ -116,7 +124,7 @@ describe("Agent API routes", () => {
   });
 
   it("rejects reply writes without tokens and returns 404 for missing reads", async () => {
-    const app = createApp({ allowedTokens: ["agent-token"] });
+    const app = createTestApp();
 
     const missingRead = await app.request("/api/agent/threads/missing");
     expect(missingRead.status).toBe(404);
@@ -133,5 +141,20 @@ describe("Agent API routes", () => {
       })
     });
     expect(missingTokenReply.status).toBe(401);
+  });
+
+  it("keeps repository state isolated between app instances", async () => {
+    const firstApp = createTestApp();
+    const secondApp = createTestApp();
+
+    await createThreadThroughApi(firstApp, "OpenClaw isolated repository thread");
+
+    const firstList = await firstApp.request("/api/agent/threads");
+    const secondList = await secondApp.request("/api/agent/threads");
+    const firstJson = await firstList.json() as { threads: unknown[] };
+    const secondJson = await secondList.json() as { threads: unknown[] };
+
+    expect(firstJson.threads).toHaveLength(1);
+    expect(secondJson.threads).toHaveLength(0);
   });
 });

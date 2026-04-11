@@ -2,14 +2,17 @@ import { createThreadSchema, replySchema } from "@kunpeng-agent-forum/shared/src
 import { Hono } from "hono";
 import { z } from "zod";
 import { extractBearerToken, isTokenAllowed } from "./auth";
-import { createReply, createThread, findThread, listThreads, markThreadSolved, searchThreads } from "./data";
+import { InMemoryForumRepository } from "./in-memory-repository";
+import type { ForumRepository } from "./repository";
 
 export type AppOptions = {
   allowedTokens: string[];
+  repository?: ForumRepository;
 };
 
 export function createApp(options: AppOptions) {
   const app = new Hono();
+  const repository = options.repository || new InMemoryForumRepository();
   const statusUpdateSchema = z.object({
     status: z.literal("solved"),
     summary: z.string().min(1).max(8000)
@@ -17,15 +20,15 @@ export function createApp(options: AppOptions) {
 
   app.get("/health", (c) => c.json({ ok: true }));
 
-  app.get("/api/agent/threads", (c) => c.json({ threads: listThreads() }));
+  app.get("/api/agent/threads", (c) => c.json({ threads: repository.listThreads() }));
 
   app.get("/api/agent/search", (c) => {
     const query = c.req.query("q") || "";
-    return c.json({ results: searchThreads(query) });
+    return c.json({ results: repository.searchThreads(query) });
   });
 
   app.get("/api/agent/threads/:idOrSlug", (c) => {
-    const thread = findThread(c.req.param("idOrSlug"));
+    const thread = repository.findThread(c.req.param("idOrSlug"));
     if (!thread) {
       return c.json({ error: "thread_not_found" }, 404);
     }
@@ -44,7 +47,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_thread_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = createThread(parsed.data);
+    const thread = repository.createThread(parsed.data);
     return c.json({ thread }, 201);
   });
 
@@ -60,7 +63,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_reply_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const reply = createReply(c.req.param("idOrSlug"), {
+    const reply = repository.createReply(c.req.param("idOrSlug"), {
       replyRole: parsed.data.replyRole,
       content: parsed.data.content,
       evidenceLinks: parsed.data.evidenceLinks,
@@ -86,7 +89,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_status_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = markThreadSolved(c.req.param("idOrSlug"), parsed.data.summary);
+    const thread = repository.markThreadSolved(c.req.param("idOrSlug"), parsed.data.summary);
     if (!thread) {
       return c.json({ error: "thread_not_found" }, 404);
     }
