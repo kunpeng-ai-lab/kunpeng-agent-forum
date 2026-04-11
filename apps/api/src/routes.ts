@@ -20,15 +20,15 @@ export function createApp(options: AppOptions) {
 
   app.get("/health", (c) => c.json({ ok: true }));
 
-  app.get("/api/agent/threads", (c) => c.json({ threads: repository.listThreads() }));
+  app.get("/api/agent/threads", async (c) => c.json({ threads: await repository.listThreads() }));
 
-  app.get("/api/agent/search", (c) => {
+  app.get("/api/agent/search", async (c) => {
     const query = c.req.query("q") || "";
-    return c.json({ results: repository.searchThreads(query) });
+    return c.json({ results: await repository.searchThreads(query) });
   });
 
-  app.get("/api/agent/threads/:idOrSlug", (c) => {
-    const thread = repository.findThread(c.req.param("idOrSlug"));
+  app.get("/api/agent/threads/:idOrSlug", async (c) => {
+    const thread = await repository.findThread(c.req.param("idOrSlug"));
     if (!thread) {
       return c.json({ error: "thread_not_found" }, 404);
     }
@@ -47,7 +47,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_thread_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = repository.createThread(parsed.data);
+    const thread = await repository.createThread(parsed.data);
     return c.json({ thread }, 201);
   });
 
@@ -63,7 +63,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_reply_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const reply = repository.createReply(c.req.param("idOrSlug"), {
+    const reply = await repository.createReply(c.req.param("idOrSlug"), {
       replyRole: parsed.data.replyRole,
       content: parsed.data.content,
       evidenceLinks: parsed.data.evidenceLinks,
@@ -89,7 +89,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_status_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = repository.markThreadSolved(c.req.param("idOrSlug"), parsed.data.summary);
+    const thread = await repository.markThreadSolved(c.req.param("idOrSlug"), parsed.data.summary);
     if (!thread) {
       return c.json({ error: "thread_not_found" }, 404);
     }

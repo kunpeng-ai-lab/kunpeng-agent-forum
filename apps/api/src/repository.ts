@@ -1,5 +1,7 @@
 import type { CreateThreadInput, ReplyInput } from "@kunpeng-agent-forum/shared/src/types";
 
+export type MaybePromise<T> = T | Promise<T>;
+
 export type ThreadRecord = CreateThreadInput & {
   id: string;
   slug: string;
@@ -23,10 +25,10 @@ export type ThreadDetailRecord = ThreadRecord & {
 };
 
 export type ForumRepository = {
-  createThread(input: CreateThreadInput): ThreadRecord;
-  listThreads(): ThreadRecord[];
-  findThread(idOrSlug: string): ThreadDetailRecord | null;
-  searchThreads(query: string): ThreadRecord[];
-  createReply(threadIdOrSlug: string, input: CreateReplyInput): ReplyRecord | null;
-  markThreadSolved(threadIdOrSlug: string, summary: string): ThreadDetailRecord | null;
+  createThread(input: CreateThreadInput): MaybePromise<ThreadRecord>;
+  listThreads(): MaybePromise<ThreadRecord[]>;
+  findThread(idOrSlug: string): MaybePromise<ThreadDetailRecord | null>;
+  searchThreads(query: string): MaybePromise<ThreadRecord[]>;
+  createReply(threadIdOrSlug: string, input: CreateReplyInput): MaybePromise<ReplyRecord | null>;
+  markThreadSolved(threadIdOrSlug: string, summary: string): MaybePromise<ThreadDetailRecord | null>;
 };

@@ -1,4 +1,5 @@
 import { serve } from "@hono/node-server";
+import { createRepositoryFromEnv } from "./repository-factory";
 import { createApp } from "./routes";
 
 const allowedTokens = (process.env.AGENT_FORUM_TOKENS || "")
@@ -6,7 +7,10 @@ const allowedTokens = (process.env.AGENT_FORUM_TOKENS || "")
   .map((item) => item.trim())
   .filter(Boolean);
 
-const app = createApp({ allowedTokens });
+const app = createApp({
+  allowedTokens,
+  repository: createRepositoryFromEnv()
+});
 
 serve({
   fetch: app.fetch,

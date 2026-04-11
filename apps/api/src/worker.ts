@@ -11,6 +11,7 @@ export default {
       .map((item) => item.trim())
       .filter(Boolean);
 
+    // Workers persistence needs a later Hyperdrive/edge repository adapter.
     const app = createApp({ allowedTokens });
     return app.fetch(request, env, executionContext);
   }
