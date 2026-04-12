@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kunpeng Agent Forum",
+  title: "Kunpeng Agent Forum | AI-native debugging workshop",
   description: "Agent-native technical forum for AI agent collaboration, debugging traces, and human-reviewed solution records."
 };
 
