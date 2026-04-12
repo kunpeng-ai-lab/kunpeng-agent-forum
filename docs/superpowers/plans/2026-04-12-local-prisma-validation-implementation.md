@@ -25,7 +25,7 @@
 - Modify: `apps/api/package.json`
 - Modify: `package.json`
 
-- [ ] **Step 1: Write the integration test**
+- [x] **Step 1: Write the integration test**
 
 Create a test file that imports `PrismaForumRepository`, `prisma`, and `describe.skipIf(!process.env.DATABASE_URL)`.
 
@@ -46,7 +46,7 @@ expect(solved?.replies.at(-1)?.replyRole).toBe("summary");
 
 Add cleanup in `finally` to delete test-created `Thread`, `Reply`, `ThreadTag`, and `Tag` rows by unique run tag/title when possible.
 
-- [ ] **Step 2: Add scripts**
+- [x] **Step 2: Add scripts**
 
 In `apps/api/package.json`:
 
@@ -61,7 +61,7 @@ In root `package.json`:
 "prisma:seed": "prisma db seed"
 ```
 
-- [ ] **Step 3: Run default API tests**
+- [x] **Step 3: Run default API tests**
 
 Run:
 
@@ -71,7 +71,7 @@ pnpm --filter @kunpeng-agent-forum/api test
 
 Expected: default API tests still pass and do not run the integration file.
 
-- [ ] **Step 4: Run opt-in Prisma test command**
+- [x] **Step 4: Run opt-in Prisma test command**
 
 Run:
 
@@ -81,7 +81,7 @@ pnpm --filter @kunpeng-agent-forum/api test:prisma
 
 Expected: if `DATABASE_URL` is not set, the integration test is skipped; if it is set and the database is prepared, the persisted workflow passes.
 
-- [ ] **Step 5: Run API typecheck**
+- [x] **Step 5: Run API typecheck**
 
 Run:
 
@@ -91,7 +91,7 @@ pnpm --filter @kunpeng-agent-forum/api typecheck
 
 Expected: pass.
 
-- [ ] **Step 6: Commit test slice**
+- [x] **Step 6: Commit test slice**
 
 ```powershell
 git add package.json apps/api/package.json apps/api/tests/prisma-repository.integration.test.ts
@@ -104,7 +104,7 @@ git commit -m "Add local Prisma repository validation"
 - Create: `docs/local-prisma-development.md`
 - Modify: `docs/cloudflare-deployment.md`
 
-- [ ] **Step 1: Create local development doc**
+- [x] **Step 1: Create local development doc**
 
 Document:
 
@@ -125,11 +125,11 @@ pnpm --filter @kunpeng-agent-forum/api dev
 
 State that this is not the Cloudflare Workers production adapter.
 
-- [ ] **Step 2: Link from Cloudflare deployment doc**
+- [x] **Step 2: Link from Cloudflare deployment doc**
 
 Add a short paragraph linking to `docs/local-prisma-development.md` and saying Workers still need Hyperdrive/edge adapter work.
 
-- [ ] **Step 3: Commit documentation**
+- [x] **Step 3: Commit documentation**
 
 ```powershell
 git add docs/local-prisma-development.md docs/cloudflare-deployment.md
@@ -141,7 +141,7 @@ git commit -m "Document local Prisma development"
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-12-local-prisma-validation-implementation.md`
 
-- [ ] **Step 1: Run full default verification**
+- [x] **Step 1: Run full default verification**
 
 Run:
 
@@ -153,7 +153,7 @@ pnpm build
 
 Expected: all pass without requiring a database.
 
-- [ ] **Step 2: Confirm README attribution**
+- [x] **Step 2: Confirm README attribution**
 
 Run:
 
@@ -163,7 +163,7 @@ Select-String -Path README.md -Pattern "相关链接|主站博客|GitHub 组织|
 
 Expected: all six markers are present.
 
-- [ ] **Step 3: Commit plan status**
+- [x] **Step 3: Commit plan status**
 
 ```powershell
 git add docs/superpowers/plans/2026-04-12-local-prisma-validation-implementation.md
