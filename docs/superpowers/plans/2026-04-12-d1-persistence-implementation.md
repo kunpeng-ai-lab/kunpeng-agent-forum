@@ -28,7 +28,7 @@
 **Files:**
 - Create: `apps/api/migrations/0001_agent_forum.sql`
 
-- [ ] **Step 1: Create the D1 migration SQL**
+- [x] **Step 1: Create the D1 migration SQL**
 
 Create `apps/api/migrations/0001_agent_forum.sql` with this content:
 
@@ -128,7 +128,7 @@ VALUES (
 ON CONFLICT(slug) DO NOTHING;
 ```
 
-- [ ] **Step 2: Commit the schema slice**
+- [x] **Step 2: Commit the schema slice**
 
 Run:
 
@@ -146,7 +146,7 @@ Expected: commit succeeds with only the migration file staged.
 - Create: `apps/api/tests/d1-repository.test.ts`
 - Modify: `apps/api/src/data.ts`
 
-- [ ] **Step 1: Write the failing repository behavior test**
+- [x] **Step 1: Write the failing repository behavior test**
 
 Create `apps/api/tests/d1-repository.test.ts` with a fake D1 database and one end-to-end repository workflow test. The fake can be intentionally small and only support the SQL issued by `D1ForumRepository`.
 
@@ -224,7 +224,7 @@ class FakeD1PreparedStatement {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify RED**
+- [x] **Step 2: Run the test to verify RED**
 
 Run:
 
@@ -234,7 +234,7 @@ pnpm --filter @kunpeng-agent-forum/api test -- tests/d1-repository.test.ts
 
 Expected: fail because `../src/d1-repository` does not exist.
 
-- [ ] **Step 3: Implement the D1 repository**
+- [x] **Step 3: Implement the D1 repository**
 
 Create `apps/api/src/d1-repository.ts`.
 
@@ -272,7 +272,7 @@ Implementation requirements:
 - Return `null` when a thread cannot be found.
 - Throw `new Error(`Agent not found: ${this.options.agentSlug}`)` when the configured agent is missing.
 
-- [ ] **Step 4: Export the D1 repository**
+- [x] **Step 4: Export the D1 repository**
 
 Modify `apps/api/src/data.ts`:
 
@@ -280,7 +280,7 @@ Modify `apps/api/src/data.ts`:
 export { D1ForumRepository } from "./d1-repository";
 ```
 
-- [ ] **Step 5: Run the D1 repository test to verify GREEN**
+- [x] **Step 5: Run the D1 repository test to verify GREEN**
 
 Run:
 
@@ -290,7 +290,7 @@ pnpm --filter @kunpeng-agent-forum/api test -- tests/d1-repository.test.ts
 
 Expected: pass.
 
-- [ ] **Step 6: Run API typecheck**
+- [x] **Step 6: Run API typecheck**
 
 Run:
 
@@ -300,7 +300,7 @@ pnpm --filter @kunpeng-agent-forum/api typecheck
 
 Expected: pass.
 
-- [ ] **Step 7: Commit the repository slice**
+- [x] **Step 7: Commit the repository slice**
 
 Run:
 
@@ -317,7 +317,7 @@ Expected: commit succeeds.
 - Modify: `apps/api/src/worker.ts`
 - Create: `apps/api/tests/worker.test.ts`
 
-- [ ] **Step 1: Write the failing Worker selection test**
+- [x] **Step 1: Write the failing Worker selection test**
 
 Create `apps/api/tests/worker.test.ts` with a fake `DB` binding and a route workflow that posts and reads a thread through the Worker export:
 
@@ -371,7 +371,7 @@ Reuse the fake D1 helper from `d1-repository.test.ts` by extracting it to a test
 export class FakeD1Database { /* same helper used by both tests */ }
 ```
 
-- [ ] **Step 2: Run the Worker test to verify RED**
+- [x] **Step 2: Run the Worker test to verify RED**
 
 Run:
 
@@ -381,7 +381,7 @@ pnpm --filter @kunpeng-agent-forum/api test -- tests/worker.test.ts
 
 Expected: fail because `worker.ts` does not yet select D1.
 
-- [ ] **Step 3: Update Worker env and repository selection**
+- [x] **Step 3: Update Worker env and repository selection**
 
 Modify `apps/api/src/worker.ts` so the env type includes `DB?: D1Database` and `AGENT_FORUM_AGENT_SLUG?: string`.
 
@@ -396,7 +396,7 @@ const app = createApp({ allowedTokens, repository });
 
 Keep the in-memory fallback when `env.DB` is absent so preview and tests without D1 still work.
 
-- [ ] **Step 4: Run Worker test to verify GREEN**
+- [x] **Step 4: Run Worker test to verify GREEN**
 
 Run:
 
@@ -406,7 +406,7 @@ pnpm --filter @kunpeng-agent-forum/api test -- tests/worker.test.ts
 
 Expected: pass.
 
-- [ ] **Step 5: Run API tests**
+- [x] **Step 5: Run API tests**
 
 Run:
 
@@ -416,7 +416,7 @@ pnpm --filter @kunpeng-agent-forum/api test
 
 Expected: pass, including D1 repository and Worker tests, without requiring a real D1 database.
 
-- [ ] **Step 6: Commit the Worker slice**
+- [x] **Step 6: Commit the Worker slice**
 
 Run:
 
@@ -434,7 +434,7 @@ Expected: commit succeeds. If the fake helper stays inside `d1-repository.test.t
 - Modify: `docs/cloudflare-deployment.md`
 - Modify: `docs/local-prisma-development.md`
 
-- [ ] **Step 1: Add D1 binding shape to Wrangler config**
+- [x] **Step 1: Add D1 binding shape to Wrangler config**
 
 Modify `apps/api/wrangler.jsonc`:
 
@@ -458,7 +458,7 @@ Modify `apps/api/wrangler.jsonc`:
 }
 ```
 
-- [ ] **Step 2: Update Cloudflare deployment docs**
+- [x] **Step 2: Update Cloudflare deployment docs**
 
 In `docs/cloudflare-deployment.md`, replace the current "Database Path" guidance with a D1-first section that includes:
 
@@ -491,7 +491,7 @@ pnpm --filter @kunpeng-agent-forum/api exec wrangler secret put AGENT_FORUM_TOKE
 The Prisma/PostgreSQL path remains documented in `docs/local-prisma-development.md` for Node/local validation only. It is not the Workers production persistence path.
 ~~~
 
-- [ ] **Step 3: Update local Prisma docs**
+- [x] **Step 3: Update local Prisma docs**
 
 Add this note near the top of `docs/local-prisma-development.md`:
 
@@ -499,7 +499,7 @@ Add this note near the top of `docs/local-prisma-development.md`:
 Production Workers persistence now targets Cloudflare D1. Use this Prisma/PostgreSQL workflow only when validating the optional Node/local repository path.
 ```
 
-- [ ] **Step 4: Commit documentation and config**
+- [x] **Step 4: Commit documentation and config**
 
 Run:
 
@@ -515,7 +515,7 @@ Expected: commit succeeds.
 **Files:**
 - Modify: `docs/superpowers/plans/2026-04-12-d1-persistence-implementation.md`
 
-- [ ] **Step 1: Run default verification**
+- [x] **Step 1: Run default verification**
 
 Run:
 
@@ -527,7 +527,7 @@ pnpm build
 
 Expected: all pass without requiring a real D1 or PostgreSQL database.
 
-- [ ] **Step 2: Confirm Prisma opt-in test still skips without DATABASE_URL**
+- [x] **Step 2: Confirm Prisma opt-in test still skips without DATABASE_URL**
 
 Run:
 
@@ -538,7 +538,7 @@ pnpm test:prisma
 
 Expected: if `DATABASE_URL=unset`, Prisma integration test is skipped. If set and prepared, it passes.
 
-- [ ] **Step 3: Confirm README attribution**
+- [x] **Step 3: Confirm README attribution**
 
 Run:
 
@@ -548,11 +548,11 @@ Select-String -Path README.md -Pattern "相关链接|主站博客|GitHub 组织|
 
 Expected: all six markers are present.
 
-- [ ] **Step 4: Mark plan checkboxes complete**
+- [x] **Step 4: Mark plan checkboxes complete**
 
 Update this plan file by changing completed steps from `- [ ]` to `- [x]`.
 
-- [ ] **Step 5: Commit plan status**
+- [x] **Step 5: Commit plan status**
 
 Run:
 
