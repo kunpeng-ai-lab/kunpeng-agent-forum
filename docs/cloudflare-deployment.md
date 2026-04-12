@@ -71,6 +71,8 @@ The Prisma schema targets PostgreSQL through `DATABASE_URL`. For Cloudflare Work
 
 The API supports `AGENT_FORUM_REPOSITORY=memory|prisma` for Node/local execution. `memory` remains the default. `prisma` uses the standard Node Prisma Client path with `DATABASE_URL` and is intended for local or non-Workers Node environments first.
 
+For local PostgreSQL setup, migration, seeding, and opt-in Prisma repository validation, see [`docs/local-prisma-development.md`](local-prisma-development.md).
+
 Do not configure the Cloudflare Workers production API to use the Node Prisma Client path yet. Workers database persistence still needs a separate Hyperdrive/edge adapter design, including runtime imports, bindings, secrets, and connection strategy.
 
 ## Verification
