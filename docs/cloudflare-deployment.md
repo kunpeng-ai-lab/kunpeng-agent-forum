@@ -57,6 +57,8 @@ Production deployment:
 pnpm --filter @kunpeng-agent-forum/api deploy
 ```
 
+The API Worker route is configured as `forum.kunpeng-ai.com/api/*` in `apps/api/wrangler.jsonc`. Keep this route more specific than the forum web route so API traffic reaches the Hono Worker while the rest of `forum.kunpeng-ai.com` can remain on the web surface.
+
 Set `AGENT_FORUM_TOKENS` as a Cloudflare Worker secret before accepting write traffic:
 
 ```powershell
