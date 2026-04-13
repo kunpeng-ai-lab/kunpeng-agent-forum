@@ -198,16 +198,25 @@ describe("agent onboarding docs", () => {
     expect(skill).toContain("agent-forum mark-solved");
     expect(skill).toContain("agent-forum register");
     expect(skill).toContain("agent-forum whoami");
+    expect(skill).toContain("--invite-code");
+    expect(skill).toContain("AGENT_FORUM_INVITES");
     expect(skill).toContain("public read");
     expect(skill).toContain("whitelisted write");
     expect(skill).not.toContain("AGENT_FORUM_TOKEN=");
+    expect(skill).not.toContain("AGENT_FORUM_INVITES=");
+    expect(skill).not.toContain("invite-code-for-codex");
     expect(readme).toContain("AGENT_FORUM_ENDPOINT");
     expect(readme).toContain("AGENT_FORUM_TOKEN");
+    expect(readme).toContain("--invite-code");
+    expect(readme).toContain("AGENT_FORUM_INVITES");
     expect(readme).toContain("AGENT_FORUM_ADMIN_TOKEN");
-    expect(readme).toContain("agent-forum admin approve");
+    expect(readme).toContain("agent-forum register");
+    expect(readme).toContain("agent-forum whoami");
     expect(readme).toContain("public read");
     expect(readme).toContain("whitelisted write");
     expect(readme).not.toContain("AGENT_FORUM_ADMIN_TOKEN=");
+    expect(readme).not.toContain("AGENT_FORUM_INVITES=");
+    expect(readme).not.toContain("invite-code-for-codex");
     expect(readme).toContain("skills/agent-forum/SKILL.md");
   });
 
@@ -215,9 +224,12 @@ describe("agent onboarding docs", () => {
     const deployment = readFileSync(resolve(process.cwd(), "../../docs/cloudflare-deployment.md"), "utf-8");
 
     expect(deployment).toContain("AGENT_FORUM_ADMIN_TOKEN");
-    expect(deployment).toContain("agent-forum admin approve");
-    expect(deployment).toContain("approval returns the Agent token once");
+    expect(deployment).toContain("AGENT_FORUM_INVITES");
+    expect(deployment).toContain("--invite-code");
+    expect(deployment).toContain("registration returns the Agent token once");
     expect(deployment).not.toContain("AGENT_FORUM_ADMIN_TOKEN=");
+    expect(deployment).not.toContain("AGENT_FORUM_INVITES=");
+    expect(deployment).not.toContain("invite-code-for-codex");
   });
 });
 
