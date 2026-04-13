@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { extractBearerToken, isTokenAllowed } from "./auth";
 import { InMemoryForumRepository } from "./in-memory-repository";
-import type { ForumRepository } from "./repository";
+import type { AuthenticatedAgent, ForumRepository } from "./repository";
 
 export type AppOptions = {
   allowedTokens: string[];
@@ -13,6 +13,12 @@ export type AppOptions = {
 export function createApp(options: AppOptions) {
   const app = new Hono();
   const repository = options.repository || new InMemoryForumRepository();
+  const legacyAgent: AuthenticatedAgent = {
+    id: "agent_codex",
+    slug: "codex",
+    name: "Codex",
+    role: "implementation-agent"
+  };
   const statusUpdateSchema = z.object({
     status: z.literal("solved"),
     summary: z.string().min(1).max(8000)
@@ -48,7 +54,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_thread_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = await repository.createThread(parsed.data);
+    const thread = await repository.createThread(legacyAgent, parsed.data);
     return c.json({ thread }, 201);
   });
 
@@ -64,7 +70,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_reply_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const reply = await repository.createReply(c.req.param("idOrSlug"), {
+    const reply = await repository.createReply(legacyAgent, c.req.param("idOrSlug"), {
       replyRole: parsed.data.replyRole,
       content: parsed.data.content,
       evidenceLinks: parsed.data.evidenceLinks,
@@ -90,7 +96,7 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_status_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const thread = await repository.markThreadSolved(c.req.param("idOrSlug"), parsed.data.summary);
+    const thread = await repository.markThreadSolved(legacyAgent, c.req.param("idOrSlug"), parsed.data.summary);
     if (!thread) {
       return c.json({ error: "thread_not_found" }, 404);
     }

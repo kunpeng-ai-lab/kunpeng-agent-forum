@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
-import type { CreateThreadInput } from "@kunpeng-agent-forum/shared/src/types";
+import type { AgentRegistrationInput, CreateThreadInput } from "@kunpeng-agent-forum/shared/src/types";
 import { slugify } from "./in-memory-repository";
-import type { CreateReplyInput, ForumRepository, ReplyRecord, ThreadDetailRecord, ThreadRecord } from "./repository";
+import type { AgentRecord, AuthenticatedAgent, CreateReplyInput, ForumRepository, ReplyRecord, ThreadDetailRecord, ThreadRecord } from "./repository";
 
 const threadListInclude = {
   tags: {
@@ -76,8 +76,27 @@ export class PrismaForumRepository implements ForumRepository {
     private readonly options: { agentSlug: string }
   ) {}
 
-  async createThread(input: CreateThreadInput): Promise<ThreadRecord> {
-    const agent = await this.findAgent(this.prisma);
+  async requestAgentRegistration(_input: AgentRegistrationInput): Promise<AgentRecord | null> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async approveAgent(_slug: string, _tokenHash: string): Promise<AgentRecord | null> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async revokeAgent(_slug: string): Promise<AgentRecord | null> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async findActiveAgentByTokenHash(_tokenHash: string): Promise<AuthenticatedAgent | null> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async touchAgentLastSeen(_agentId: string, _timestamp: string): Promise<void> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async createThread(agent: AuthenticatedAgent, input: CreateThreadInput): Promise<ThreadRecord> {
     const data: Prisma.ThreadCreateInput = {
       title: input.title,
       slug: slugify(input.title),
@@ -155,7 +174,7 @@ export class PrismaForumRepository implements ForumRepository {
     return threads.map(mapThread);
   }
 
-  async createReply(threadIdOrSlug: string, input: CreateReplyInput): Promise<ReplyRecord | null> {
+  async createReply(agent: AuthenticatedAgent, threadIdOrSlug: string, input: CreateReplyInput): Promise<ReplyRecord | null> {
     const thread = await this.prisma.thread.findFirst({
       where: { OR: [{ id: threadIdOrSlug }, { slug: threadIdOrSlug }] }
     });
@@ -163,7 +182,6 @@ export class PrismaForumRepository implements ForumRepository {
       return null;
     }
 
-    const agent = await this.findAgent(this.prisma);
     const reply = await this.prisma.reply.create({
       data: {
         thread: { connect: { id: thread.id } },
@@ -178,7 +196,7 @@ export class PrismaForumRepository implements ForumRepository {
     return mapReply(reply);
   }
 
-  async markThreadSolved(threadIdOrSlug: string, summary: string): Promise<ThreadDetailRecord | null> {
+  async markThreadSolved(agent: AuthenticatedAgent, threadIdOrSlug: string, summary: string): Promise<ThreadDetailRecord | null> {
     return await this.prisma.$transaction(async (tx) => {
       const thread = await tx.thread.findFirst({
         where: { OR: [{ id: threadIdOrSlug }, { slug: threadIdOrSlug }] }
@@ -187,7 +205,6 @@ export class PrismaForumRepository implements ForumRepository {
         return null;
       }
 
-      const agent = await this.findAgent(tx);
       await tx.thread.update({
         where: { id: thread.id },
         data: { status: "solved" }

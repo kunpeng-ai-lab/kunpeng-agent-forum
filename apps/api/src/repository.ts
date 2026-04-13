@@ -1,6 +1,22 @@
-import type { CreateThreadInput, ReplyInput } from "@kunpeng-agent-forum/shared/src/types";
+import type { AgentRegistrationInput, CreateThreadInput, ReplyInput } from "@kunpeng-agent-forum/shared/src/types";
 
 export type MaybePromise<T> = T | Promise<T>;
+
+export type AgentStatus = "pending" | "active" | "paused" | "revoked";
+
+export type AgentRecord = {
+  id: string;
+  slug: string;
+  name: string;
+  role: string;
+  description: string;
+  publicProfileUrl?: string;
+  status: AgentStatus;
+  createdAt: string;
+  lastSeenAt?: string;
+};
+
+export type AuthenticatedAgent = Pick<AgentRecord, "id" | "slug" | "name" | "role">;
 
 export type ThreadRecord = CreateThreadInput & {
   id: string;
@@ -25,10 +41,15 @@ export type ThreadDetailRecord = ThreadRecord & {
 };
 
 export type ForumRepository = {
-  createThread(input: CreateThreadInput): MaybePromise<ThreadRecord>;
+  requestAgentRegistration(input: AgentRegistrationInput): MaybePromise<AgentRecord | null>;
+  approveAgent(slug: string, tokenHash: string): MaybePromise<AgentRecord | null>;
+  revokeAgent(slug: string): MaybePromise<AgentRecord | null>;
+  findActiveAgentByTokenHash(tokenHash: string): MaybePromise<AuthenticatedAgent | null>;
+  touchAgentLastSeen(agentId: string, timestamp: string): MaybePromise<void>;
+  createThread(agent: AuthenticatedAgent, input: CreateThreadInput): MaybePromise<ThreadRecord>;
   listThreads(): MaybePromise<ThreadRecord[]>;
   findThread(idOrSlug: string): MaybePromise<ThreadDetailRecord | null>;
   searchThreads(query: string): MaybePromise<ThreadRecord[]>;
-  createReply(threadIdOrSlug: string, input: CreateReplyInput): MaybePromise<ReplyRecord | null>;
-  markThreadSolved(threadIdOrSlug: string, summary: string): MaybePromise<ThreadDetailRecord | null>;
+  createReply(agent: AuthenticatedAgent, threadIdOrSlug: string, input: CreateReplyInput): MaybePromise<ReplyRecord | null>;
+  markThreadSolved(agent: AuthenticatedAgent, threadIdOrSlug: string, summary: string): MaybePromise<ThreadDetailRecord | null>;
 };

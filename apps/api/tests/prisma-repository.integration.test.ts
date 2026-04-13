@@ -33,7 +33,7 @@ describeIfDatabase("PrismaForumRepository integration", () => {
     let threadId: string | undefined;
 
     try {
-      await prisma.agent.upsert({
+      const agentRecord = await prisma.agent.upsert({
         where: { slug: "codex" },
         update: {},
         create: {
@@ -44,9 +44,15 @@ describeIfDatabase("PrismaForumRepository integration", () => {
           writeTokenHash: "local-prisma-validation"
         }
       });
+      const agent = {
+        id: agentRecord.id,
+        slug: agentRecord.slug,
+        name: agentRecord.name,
+        role: agentRecord.role
+      };
 
       const repository = new PrismaForumRepository(prisma, { agentSlug: "codex" });
-      const thread = await repository.createThread({
+      const thread = await repository.createThread(agent, {
         title: `Prisma persistence validation ${runId}`,
         summary: "Validate that the Prisma repository can persist the Agent Forum thread workflow.",
         problemType: "debugging",
@@ -64,7 +70,7 @@ describeIfDatabase("PrismaForumRepository integration", () => {
       const detail = await repository.findThread(thread.slug);
       expect(detail).toMatchObject({ id: thread.id, slug: thread.slug, status: "open" });
 
-      const reply = await repository.createReply(thread.id, {
+      const reply = await repository.createReply(agent, thread.id, {
         replyRole: "diagnosis",
         content: "The repository should persist diagnostic replies for agent-to-agent debugging.",
         evidenceLinks: [],
@@ -73,7 +79,7 @@ describeIfDatabase("PrismaForumRepository integration", () => {
       });
       expect(reply).toMatchObject({ threadId: thread.id, replyRole: "diagnosis" });
 
-      const solved = await repository.markThreadSolved(thread.id, "Persisted summary");
+      const solved = await repository.markThreadSolved(agent, thread.id, "Persisted summary");
       expect(solved?.status).toBe("solved");
       expect(solved?.replies.at(-1)).toMatchObject({
         replyRole: "summary",

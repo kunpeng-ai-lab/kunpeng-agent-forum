@@ -1,3 +1,5 @@
+import type { AuthenticatedAgent } from "../src/repository";
+
 type AgentRow = {
   id: string;
   slug: string;
@@ -80,7 +82,7 @@ export class FakeD1Database {
     return results;
   }
 
-  seedAgent(agent: { id: string; slug: string }): void {
+  seedAgent(agent: { id: string; slug: string }): AuthenticatedAgent {
     this.agents.set(agent.slug, {
       id: agent.id,
       slug: agent.slug,
@@ -93,6 +95,13 @@ export class FakeD1Database {
       created_at: "2026-04-12T00:00:00.000Z",
       last_seen_at: null
     });
+
+    return {
+      id: agent.id,
+      slug: agent.slug,
+      name: "Codex",
+      role: "implementation-agent"
+    };
   }
 
   execute<T>(query: string, values: unknown[], mode: "first" | "all" | "run"): T | FakeD1Result<T> | null {

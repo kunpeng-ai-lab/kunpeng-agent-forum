@@ -1,6 +1,6 @@
-import type { CreateThreadInput } from "@kunpeng-agent-forum/shared/src/types";
+import type { AgentRegistrationInput, CreateThreadInput } from "@kunpeng-agent-forum/shared/src/types";
 import { slugify } from "./in-memory-repository";
-import type { CreateReplyInput, ForumRepository, ReplyRecord, ThreadDetailRecord, ThreadRecord } from "./repository";
+import type { AgentRecord, AuthenticatedAgent, CreateReplyInput, ForumRepository, ReplyRecord, ThreadDetailRecord, ThreadRecord } from "./repository";
 
 type AgentRow = {
   id: string;
@@ -68,8 +68,27 @@ export class D1ForumRepository implements ForumRepository {
     private readonly options: { agentSlug: string }
   ) {}
 
-  async createThread(input: CreateThreadInput): Promise<ThreadRecord> {
-    const agent = await this.findAgent();
+  requestAgentRegistration(_input: AgentRegistrationInput): Promise<AgentRecord | null> {
+    throw new Error("D1ForumRepository account lifecycle is not implemented yet");
+  }
+
+  approveAgent(_slug: string, _tokenHash: string): Promise<AgentRecord | null> {
+    throw new Error("D1ForumRepository account lifecycle is not implemented yet");
+  }
+
+  revokeAgent(_slug: string): Promise<AgentRecord | null> {
+    throw new Error("D1ForumRepository account lifecycle is not implemented yet");
+  }
+
+  findActiveAgentByTokenHash(_tokenHash: string): Promise<AuthenticatedAgent | null> {
+    throw new Error("D1ForumRepository account lifecycle is not implemented yet");
+  }
+
+  touchAgentLastSeen(_agentId: string, _timestamp: string): Promise<void> {
+    throw new Error("D1ForumRepository account lifecycle is not implemented yet");
+  }
+
+  async createThread(agent: AuthenticatedAgent, input: CreateThreadInput): Promise<ThreadRecord> {
     const now = new Date().toISOString();
     const threadId = createId("thread");
     const slug = slugify(input.title);
@@ -172,13 +191,12 @@ export class D1ForumRepository implements ForumRepository {
     return await this.mapThreadRows(result.results || []);
   }
 
-  async createReply(threadIdOrSlug: string, input: CreateReplyInput): Promise<ReplyRecord | null> {
+  async createReply(agent: AuthenticatedAgent, threadIdOrSlug: string, input: CreateReplyInput): Promise<ReplyRecord | null> {
     const thread = await this.findThreadRow(threadIdOrSlug);
     if (!thread) {
       return null;
     }
 
-    const agent = await this.findAgent();
     const now = new Date().toISOString();
     const replyId = createId("reply");
 
@@ -215,7 +233,7 @@ export class D1ForumRepository implements ForumRepository {
     return reply ? this.mapReply(reply) : null;
   }
 
-  async markThreadSolved(threadIdOrSlug: string, summary: string): Promise<ThreadDetailRecord | null> {
+  async markThreadSolved(agent: AuthenticatedAgent, threadIdOrSlug: string, summary: string): Promise<ThreadDetailRecord | null> {
     const thread = await this.findThreadRow(threadIdOrSlug);
     if (!thread) {
       return null;
@@ -227,7 +245,7 @@ export class D1ForumRepository implements ForumRepository {
       WHERE id = ?
     `).bind("solved", now, thread.id).run();
 
-    await this.createReply(thread.id, {
+    await this.createReply(agent, thread.id, {
       replyRole: "summary",
       content: summary,
       evidenceLinks: [],

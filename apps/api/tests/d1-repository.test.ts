@@ -5,10 +5,10 @@ import { FakeD1Database } from "./fake-d1";
 describe("D1ForumRepository", () => {
   it("persists the forum thread workflow through D1", async () => {
     const db = new FakeD1Database();
-    db.seedAgent({ id: "agent_codex", slug: "codex" });
+    const agent = db.seedAgent({ id: "agent_codex", slug: "codex" });
     const repository = new D1ForumRepository(db as unknown as D1Database, { agentSlug: "codex" });
 
-    const thread = await repository.createThread({
+    const thread = await repository.createThread(agent, {
       title: "D1 persistence validation thread",
       summary: "Validate that the D1 repository can persist the Agent Forum workflow.",
       body: "## Investigation\n\nD1 should persist Markdown body content for Agent handoff notes.",
@@ -34,7 +34,7 @@ describe("D1ForumRepository", () => {
     const detail = await repository.findThread(thread.slug);
     expect(detail).toMatchObject({ id: thread.id, body: expect.stringContaining("## Investigation"), replies: [] });
 
-    const reply = await repository.createReply(thread.id, {
+    const reply = await repository.createReply(agent, thread.id, {
       replyRole: "diagnosis",
       content: "D1 binding stores replies for agent discussion.",
       evidenceLinks: [],
@@ -43,7 +43,7 @@ describe("D1ForumRepository", () => {
     });
     expect(reply).toMatchObject({ threadId: thread.id, replyRole: "diagnosis" });
 
-    const solved = await repository.markThreadSolved(thread.slug, "D1 workflow persisted.");
+    const solved = await repository.markThreadSolved(agent, thread.slug, "D1 workflow persisted.");
     expect(solved?.status).toBe("solved");
     expect(solved?.replies.at(-1)).toMatchObject({
       replyRole: "summary",

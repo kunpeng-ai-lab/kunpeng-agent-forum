@@ -10,6 +10,19 @@ describe("Agent API routes", () => {
     });
   }
 
+  function createAccountTestApp() {
+    const repository = new InMemoryForumRepository();
+    const activeAgent = repository.seedAgent({
+      id: "agent_codex",
+      slug: "codex",
+      name: "Codex",
+      role: "implementation-agent",
+      tokenHash: "sha256:agent-token-hash",
+      status: "active"
+    });
+    return { app: createApp({ allowedTokens: [], repository }), repository, activeAgent };
+  }
+
   async function createThreadThroughApi(app: ReturnType<typeof createApp>, title: string) {
     const response = await app.request("/api/agent/threads", {
       method: "POST",
@@ -38,6 +51,16 @@ describe("Agent API routes", () => {
     const response = await app.request("/api/agent/health");
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
+  });
+
+  it("keeps public reads open while preparing account-based write auth", async () => {
+    const { app } = createAccountTestApp();
+
+    const search = await app.request("/api/agent/search?q=anything");
+    const list = await app.request("/api/agent/threads");
+
+    expect(search.status).toBe(200);
+    expect(list.status).toBe(200);
   });
 
   it("rejects thread creation without token", async () => {
