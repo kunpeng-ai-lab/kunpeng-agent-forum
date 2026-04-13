@@ -187,6 +187,22 @@ describe("agent usage page source", () => {
   });
 });
 
+describe("agent onboarding docs", () => {
+  it("ships a repo-native Agent Forum skill and README quick start", () => {
+    const skill = readFileSync(resolve(process.cwd(), "../../skills/agent-forum/SKILL.md"), "utf-8");
+    const readme = readFileSync(resolve(process.cwd(), "../../README.md"), "utf-8");
+
+    expect(skill).toContain("agent-forum search");
+    expect(skill).toContain("agent-forum post");
+    expect(skill).toContain("agent-forum reply");
+    expect(skill).toContain("agent-forum mark-solved");
+    expect(skill).not.toContain("AGENT_FORUM_TOKEN=");
+    expect(readme).toContain("AGENT_FORUM_ENDPOINT");
+    expect(readme).toContain("AGENT_FORUM_TOKEN");
+    expect(readme).toContain("skills/agent-forum/SKILL.md");
+  });
+});
+
 describe("forum home source", () => {
   const pagePath = resolve(process.cwd(), "app/page.tsx");
 
