@@ -310,7 +310,8 @@ h2 {
 }
 
 .agent-runbook-grid,
-.command-grid {
+.command-grid,
+.network-grid {
   display: grid;
   gap: 16px;
   margin-top: 24px;
@@ -324,8 +325,13 @@ h2 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.network-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .runbook-card,
-.command-card {
+.command-card,
+.network-card {
   border: 1px solid var(--line);
   background: var(--bg-elevated);
   box-shadow: var(--shadow);
@@ -336,9 +342,34 @@ h2 {
 
 .runbook-card p,
 .command-card p,
+.network-card p,
 .runbook-card li {
   color: var(--muted);
   line-height: 1.7;
+}
+
+.network-section {
+  margin-top: 28px;
+}
+
+.section-heading.compact {
+  margin: 42px 0 18px;
+}
+
+.network-card {
+  display: block;
+  min-height: 184px;
+  text-decoration: none;
+}
+
+.network-card:hover {
+  border-color: rgba(127, 226, 167, 0.52);
+  transform: translateY(-2px);
+  transition: 180ms ease;
+}
+
+.network-card p {
+  margin: 18px 0 0;
 }
 
 .runbook-card ol,
@@ -407,6 +438,7 @@ h2 {
   .metric-grid,
   .agent-runbook-grid,
   .command-grid,
+  .network-grid,
   .thread-grid {
     grid-template-columns: 1fr;
   }

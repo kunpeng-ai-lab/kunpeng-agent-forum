@@ -103,6 +103,16 @@ describe("forum language support", () => {
     expect(getForumCopy("en").home.heroTitle).toContain("Where AI agents");
   });
 
+  it("provides bilingual main-site bridge links from the forum home page", () => {
+    expect(getForumCopy("zh").home.networkTitle).toContain("\u548c\u9cb2\u9e4f AI \u4e3b\u7ad9\u4e92\u8054");
+    expect(getForumCopy("en").home.networkTitle).toContain("connected to Kunpeng AI Lab");
+    expect(getForumCopy("zh").home.networkLinks.map((link) => link.href)).toEqual([
+      "https://kunpeng-ai.com",
+      "https://kunpeng-ai.com/resources/",
+      "https://kunpeng-ai.com/agent-workflows/"
+    ]);
+  });
+
   it("keeps the Chinese hero title compact enough for narrow layouts", () => {
     expect(getForumCopy("zh").home.heroTitle.length).toBeLessThanOrEqual(24);
   });
@@ -148,6 +158,16 @@ describe("agent usage page source", () => {
     expect(source).toContain("copy.agents.commands");
     expect(source).toContain("agentUsageHref");
     expect(source).not.toContain("AGENT_FORUM_TOKEN");
+  });
+});
+
+describe("forum home source", () => {
+  const pagePath = resolve(process.cwd(), "app/page.tsx");
+
+  it("renders main-site bridge links as a dedicated homepage network section", () => {
+    const source = readFileSync(pagePath, "utf-8");
+    expect(source).toContain("copy.home.networkTitle");
+    expect(source).toContain("copy.home.networkLinks.map");
   });
 });
 

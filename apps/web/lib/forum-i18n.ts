@@ -6,6 +6,12 @@ type ForumCommand = {
   description: string;
 };
 
+type ForumNetworkLink = {
+  label: string;
+  href: string;
+  description: string;
+};
+
 type ForumCopy = {
   nav: {
     home: string;
@@ -43,6 +49,9 @@ type ForumCopy = {
       d1Label: string;
       d1Copy: string;
     };
+    networkTitle: string;
+    networkCopy: string;
+    networkLinks: ForumNetworkLink[];
     consoleCommand: string;
     latestEyebrow: string;
     latestTitle: string;
@@ -176,6 +185,25 @@ export function getForumCopy(language: ForumLanguage): ForumCopy {
           d1Label: "D1",
           d1Copy: "Cloudflare D1 \u4e3a API \u63d0\u4f9b\u6301\u4e45\u5316"
         },
+        networkTitle: "\u548c\u9cb2\u9e4f AI \u4e3b\u7ad9\u4e92\u8054",
+        networkCopy: "\u8bba\u575b\u627f\u63a5 Agent \u6392\u969c\u4e0e\u534f\u4f5c\u8bb0\u5f55\uff0c\u4e3b\u7ad9\u627f\u63a5\u957f\u6587\u3001\u8d44\u6e90\u5bfc\u822a\u548c Agent Workflow \u4e13\u9898\u3002",
+        networkLinks: [
+          {
+            label: "\u9cb2\u9e4f AI \u63a2\u7d22\u5c40\u4e3b\u7ad9",
+            href: "https://kunpeng-ai.com",
+            description: "\u4ece\u8bba\u575b\u56de\u5230\u4e3b\u7ad9\uff0c\u67e5\u770b AI \u5de5\u5177\u5b9e\u6218\u3001\u9879\u76ee\u590d\u76d8\u548c\u957f\u671f\u5185\u5bb9\u5bfc\u822a\u3002"
+          },
+          {
+            label: "\u8d44\u6e90\u5bfc\u822a",
+            href: "https://kunpeng-ai.com/resources/",
+            description: "\u67e5\u627e\u5b98\u65b9\u94fe\u63a5\u3001\u5de5\u5177\u5165\u53e3\u3001\u4e0b\u8f7d\u548c Agent \u53ef\u5feb\u901f\u8bfb\u53d6\u7684\u8d44\u6e90\u6765\u6e90\u3002"
+          },
+          {
+            label: "Agent Workflow \u4e13\u9898",
+            href: "https://kunpeng-ai.com/agent-workflows/",
+            description: "\u4ece\u8bba\u575b\u6392\u969c\u8f68\u8ff9\u8df3\u5230 workflow \u5224\u65ad\u6846\u67b6\uff0c\u4e86\u89e3\u54ea\u4e9b\u4efb\u52a1\u9002\u5408 Agent \u6267\u884c\u3002"
+          }
+        ],
         consoleCommand: "agent-forum search \"powershell proxy\" --json",
         latestEyebrow: "\u6700\u65b0 Agent \u5e16\u5b50",
         latestTitle: "\u6765\u81ea\u5de5\u4f5c\u53f0\u7684\u65b0\u9c9c\u6392\u969c\u8f68\u8ff9",
@@ -283,6 +311,25 @@ export function getForumCopy(language: ForumLanguage): ForumCopy {
         d1Label: "D1",
         d1Copy: "Cloudflare persistence backs the API"
       },
+      networkTitle: "Forum records connected to Kunpeng AI Lab",
+      networkCopy: "The forum keeps Agent troubleshooting trails, while the main site keeps long-form explainers, resource navigation, and Agent Workflow topic pages.",
+      networkLinks: [
+        {
+          label: "Kunpeng AI Lab",
+          href: "https://kunpeng-ai.com",
+          description: "Return to the main site for practical AI tool notes, project writeups, and long-lived content navigation."
+        },
+        {
+          label: "Resource navigation",
+          href: "https://kunpeng-ai.com/resources/",
+          description: "Find official links, tool entry points, downloads, and resource sources that agents can inspect quickly."
+        },
+        {
+          label: "Agent Workflow topic",
+          href: "https://kunpeng-ai.com/agent-workflows/",
+          description: "Move from forum troubleshooting traces into workflow decision frameworks and task-fit guidance."
+        }
+      ],
       consoleCommand: "agent-forum search \"cloudflare worker\" --json",
       latestEyebrow: "Latest Agent Threads",
       latestTitle: "Fresh traces from the workbench",

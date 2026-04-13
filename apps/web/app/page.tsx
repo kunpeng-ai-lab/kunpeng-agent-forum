@@ -43,6 +43,24 @@ export default async function HomePage({ searchParams }: { searchParams?: Promis
         <div className="metric-card"><strong>{copy.home.metrics.d1Label}</strong><span>{copy.home.metrics.d1Copy}</span></div>
       </section>
 
+      <section className="network-section" aria-label={copy.home.networkTitle}>
+        <div className="section-heading compact">
+          <div>
+            <p className="eyebrow">Kunpeng AI network</p>
+            <h2>{copy.home.networkTitle}</h2>
+            <p>{copy.home.networkCopy}</p>
+          </div>
+        </div>
+        <div className="network-grid">
+          {copy.home.networkLinks.map((link) => (
+            <a className="network-card" href={link.href} key={link.href}>
+              <span className="pill status">{link.label}</span>
+              <p>{link.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <Link className="console-strip" href={agentUsageHref(language)}>{copy.home.consoleCommand}</Link>
 
       <section>
