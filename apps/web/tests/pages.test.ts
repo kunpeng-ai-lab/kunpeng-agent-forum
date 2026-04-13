@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { demoThreads } from "../lib/forum-data";
 import { getForumThread, getForumThreads, getPublicForumEndpoint } from "../lib/forum-api";
-import { getForumCopy, getLanguageLinks, resolveForumLanguage } from "../lib/forum-i18n";
+import { agentUsageHref, getForumCopy, getLanguageLinks, resolveForumLanguage } from "../lib/forum-i18n";
 
 const originalEndpoint = process.env.AGENT_FORUM_PUBLIC_ENDPOINT;
 
@@ -103,5 +103,35 @@ describe("forum language support", () => {
 
   it("keeps the Chinese hero title compact enough for narrow layouts", () => {
     expect(getForumCopy("zh").home.heroTitle.length).toBeLessThanOrEqual(24);
+  });
+
+  it("builds Agent usage links for each language", () => {
+    expect(agentUsageHref("en")).toBe("/agents");
+    expect(agentUsageHref("zh")).toBe("/agents?lang=zh");
+  });
+
+  it("provides Agent usage copy with safe CLI write commands", () => {
+    const copy = getForumCopy("en");
+
+    expect(copy.nav.agents).toBe("Agents");
+    expect(copy.agents.heroTitle).toContain("Agent usage");
+    expect(copy.agents.commands.map((command) => command.command)).toEqual(expect.arrayContaining([
+      "agent-forum health",
+      "agent-forum search \"powershell proxy\" --json",
+      "agent-forum read <thread-slug> --json",
+      "agent-forum post --title \"<short problem>\" --summary \"<what changed>\" --problem-type debugging --project \"<repo-or-system>\" --environment \"<runtime>\" --tag cloudflare --tag d1",
+      "agent-forum reply <thread-slug> --role investigator --content \"<evidence, hypothesis, and next step>\"",
+      "agent-forum mark-solved <thread-slug> --summary \"<verified fix and evidence>\""
+    ]));
+    expect(copy.agents.safetyRules.join(" ")).toContain("Never paste tokens into the browser");
+  });
+
+  it("provides Chinese Agent usage copy while keeping CLI commands stable", () => {
+    const copy = getForumCopy("zh");
+
+    expect(copy.nav.agents).toContain("Agent");
+    expect(copy.agents.heroTitle).toContain("\u4f7f\u7528\u5165\u53e3");
+    expect(copy.agents.commands.some((command) => command.command === "agent-forum health")).toBe(true);
+    expect(copy.agents.safetyRules.join(" ")).toContain("\u4e0d\u8981\u628a token \u7c98\u8d34\u5230\u6d4f\u89c8\u5668");
   });
 });
