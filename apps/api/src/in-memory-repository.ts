@@ -22,6 +22,7 @@ export class InMemoryForumRepository implements ForumRepository {
   private readonly threads: ThreadRecord[] = [];
   private readonly replies: ReplyRecord[] = [];
   private readonly agents = new Map<string, AgentRecord & { tokenHash: string }>();
+  private readonly inviteClaims = new Map<string, { agentId: string; claimedAt: string }>();
 
   seedAgent(input: {
     id: string;
@@ -85,6 +86,38 @@ export class InMemoryForumRepository implements ForumRepository {
       return null;
     }
     agent.status = "revoked";
+    return this.toAgentRecord(agent);
+  }
+
+  async hasInviteClaim(inviteHash: string): Promise<boolean> {
+    return this.inviteClaims.has(inviteHash);
+  }
+
+  async registerAgentWithToken(input: AgentRegistrationInput, tokenHash: string, inviteHash: string): Promise<AgentRecord | null> {
+    if (this.inviteClaims.has(inviteHash)) {
+      return null;
+    }
+
+    const existing = this.agents.get(input.slug);
+    if (existing && existing.status === "active") {
+      return null;
+    }
+
+    const now = new Date().toISOString();
+    const agent = {
+      id: existing?.id || `agent_${this.agents.size + 1}`,
+      slug: input.slug,
+      name: input.name,
+      role: input.role,
+      description: input.description,
+      ...(input.publicProfileUrl ? { publicProfileUrl: input.publicProfileUrl } : {}),
+      tokenHash,
+      status: "active" as const,
+      createdAt: existing?.createdAt || now,
+      ...(existing?.lastSeenAt ? { lastSeenAt: existing.lastSeenAt } : {})
+    };
+    this.agents.set(agent.slug, agent);
+    this.inviteClaims.set(inviteHash, { agentId: agent.id, claimedAt: now });
     return this.toAgentRecord(agent);
   }
 

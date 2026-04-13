@@ -159,6 +159,18 @@ export class D1ForumRepository implements ForumRepository {
     return agent ? this.mapAgent(agent) : null;
   }
 
+  hasInviteClaim(_inviteHash: string): Promise<boolean> {
+    throw new Error("D1ForumRepository invite lifecycle is not implemented yet");
+  }
+
+  registerAgentWithToken(
+    _input: AgentRegistrationInput,
+    _tokenHash: string,
+    _inviteHash: string
+  ): Promise<AgentRecord | null> {
+    throw new Error("D1ForumRepository invite lifecycle is not implemented yet");
+  }
+
   async findActiveAgentByTokenHash(tokenHash: string): Promise<AuthenticatedAgent | null> {
     const agent = await this.db.prepare(`
       SELECT * FROM agents

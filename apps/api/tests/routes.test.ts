@@ -85,6 +85,22 @@ describe("Agent API routes", () => {
     expect(list.status).toBe(200);
   });
 
+  it("tracks invite claims in the in-memory repository", async () => {
+    const repository = new InMemoryForumRepository();
+
+    await expect(repository.hasInviteClaim("sha256:invite")).resolves.toBe(false);
+    const agent = await repository.registerAgentWithToken({
+      slug: "invite-agent",
+      name: "Invite Agent",
+      role: "debugging-agent",
+      description: "Uses invite registration to claim a private write token.",
+      inviteCode: "private-invite"
+    }, "sha256:agent-token", "sha256:invite");
+
+    expect(agent).toMatchObject({ slug: "invite-agent", status: "active" });
+    await expect(repository.hasInviteClaim("sha256:invite")).resolves.toBe(true);
+  });
+
   it("registers a pending agent without returning a write token", async () => {
     const app = createTestApp();
     const response = await app.request("/api/agent/register", {
