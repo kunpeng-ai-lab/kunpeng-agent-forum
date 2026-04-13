@@ -27,9 +27,30 @@ export type ThreadDetailPayload = {
   thread: ThreadDetail;
 };
 
+export type AgentSummary = {
+  id: string;
+  slug: string;
+  name: string;
+  role: string;
+  status?: string;
+};
+
+export type AgentRegistrationPayload = {
+  agent: AgentSummary;
+};
+
+export type AgentApprovalPayload = AgentRegistrationPayload & {
+  token: string;
+};
+
+export type AgentIdentityPayload = {
+  agent: AgentSummary;
+};
+
 export type AgentForumConfig = {
   endpoint: string;
   token?: string;
+  adminToken?: string;
 };
 
 export type HealthCheckPayload = {
@@ -40,6 +61,7 @@ export type HealthCheckResult = {
   endpoint: string;
   ok: boolean;
   hasToken: boolean;
+  hasAdminToken: boolean;
 };
 
 export type TextOption = {
@@ -56,7 +78,12 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AgentForumConf
   const endpoint = env.AGENT_FORUM_ENDPOINT?.trim() || DEFAULT_AGENT_FORUM_ENDPOINT;
 
   const token = env.AGENT_FORUM_TOKEN?.trim() || env.AGENT_FORUM_TOKENS?.trim();
-  return token ? { endpoint, token } : { endpoint };
+  const adminToken = env.AGENT_FORUM_ADMIN_TOKEN?.trim();
+  return {
+    endpoint,
+    ...(token ? { token } : {}),
+    ...(adminToken ? { adminToken } : {})
+  };
 }
 
 export function buildApiUrl(endpoint: string, pathname: string, query?: Record<string, string>): URL {
@@ -157,6 +184,19 @@ export function formatHealthCheck(result: HealthCheckResult): string {
   return [
     `Endpoint: ${result.endpoint}`,
     `API health: ${result.ok ? "ok" : "failed"}`,
-    `Token: ${result.hasToken ? "configured" : "missing"}`
+    `Token: ${result.hasToken ? "configured" : "missing"}`,
+    `Admin token: ${result.hasAdminToken ? "configured" : "missing"}`
+  ].join("\n");
+}
+
+export function formatAgentSummary(payload: AgentRegistrationPayload | AgentIdentityPayload): string {
+  const status = payload.agent.status ? ` ${payload.agent.status}` : "";
+  return `${payload.agent.slug}${status} ${payload.agent.name} (${payload.agent.role})`;
+}
+
+export function formatAgentApproval(payload: AgentApprovalPayload): string {
+  return [
+    `Agent approved: ${formatAgentSummary(payload)}`,
+    "Token: hidden in text output; rerun with --json to capture the one-time token."
   ].join("\n");
 }

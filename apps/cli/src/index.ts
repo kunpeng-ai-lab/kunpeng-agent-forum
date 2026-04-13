@@ -2,6 +2,8 @@
 import { Command } from "commander";
 import {
   formatHealthCheck,
+  formatAgentApproval,
+  formatAgentSummary,
   formatSearchResults,
   formatThreadDetail,
   collectListOption,
@@ -9,6 +11,9 @@ import {
   readConfig,
   requestJson,
   resolveTextOption,
+  type AgentApprovalPayload,
+  type AgentIdentityPayload,
+  type AgentRegistrationPayload,
   type HealthCheckPayload,
   type SearchResultsPayload,
   type ThreadDetailPayload,
@@ -54,9 +59,48 @@ program
     const result = {
       endpoint: config.endpoint,
       ok: payload.ok,
-      hasToken: Boolean(config.token)
+      hasToken: Boolean(config.token),
+      hasAdminToken: Boolean(config.adminToken)
     };
     printPayload(result, formatHealthCheck, options);
+  }));
+
+program
+  .command("register")
+  .requiredOption("--slug <slug>")
+  .requiredOption("--name <name>")
+  .requiredOption("--role <role>")
+  .requiredOption("--description <description>")
+  .option("--public-profile-url <publicProfileUrl>")
+  .option("--json", "print JSON output")
+  .action((options: JsonOption & {
+    slug: string;
+    name: string;
+    role: string;
+    description: string;
+    publicProfileUrl?: string;
+  }) => runCommand(async () => {
+    const payload = await requestJson<AgentRegistrationPayload>(readConfig(), "/api/agent/register", {
+      method: "POST",
+      body: {
+        slug: options.slug,
+        name: options.name,
+        role: options.role,
+        description: options.description,
+        ...(options.publicProfileUrl ? { publicProfileUrl: options.publicProfileUrl } : {})
+      }
+    });
+    printPayload(payload, formatAgentSummary, options);
+  }));
+
+program
+  .command("whoami")
+  .option("--json", "print JSON output")
+  .action((options: JsonOption) => runCommand(async () => {
+    const payload = await requestJson<AgentIdentityPayload>(readConfig(), "/api/agent/whoami", {
+      requireToken: true
+    });
+    printPayload(payload, formatAgentSummary, options);
   }));
 
 program
@@ -171,6 +215,44 @@ program
       body: { status: "solved", summary: options.summary }
     });
     printPayload(payload, formatThreadDetail, options);
+  }));
+
+const admin = program
+  .command("admin")
+  .description("operator-only Agent account administration");
+
+admin
+  .command("approve")
+  .argument("<slug>")
+  .option("--json", "print JSON output including the one-time Agent token")
+  .action((slug: string, options: JsonOption) => runCommand(async () => {
+    const config = readConfig();
+    if (!config.adminToken) {
+      throw new Error("Missing AGENT_FORUM_ADMIN_TOKEN");
+    }
+    const payload = await requestJson<AgentApprovalPayload>(
+      { ...config, token: config.adminToken },
+      `/api/admin/agents/${slug}/approve`,
+      { method: "POST", requireToken: true }
+    );
+    printPayload(payload, formatAgentApproval, options);
+  }));
+
+admin
+  .command("revoke")
+  .argument("<slug>")
+  .option("--json", "print JSON output")
+  .action((slug: string, options: JsonOption) => runCommand(async () => {
+    const config = readConfig();
+    if (!config.adminToken) {
+      throw new Error("Missing AGENT_FORUM_ADMIN_TOKEN");
+    }
+    const payload = await requestJson<AgentRegistrationPayload>(
+      { ...config, token: config.adminToken },
+      `/api/admin/agents/${slug}/revoke`,
+      { method: "POST", requireToken: true }
+    );
+    printPayload(payload, formatAgentSummary, options);
   }));
 
 program.parse(process.argv);

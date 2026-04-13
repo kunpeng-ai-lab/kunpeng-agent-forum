@@ -43,6 +43,16 @@ describe("Agent Forum CLI", () => {
     }).token).toBe("singular-token");
   });
 
+  it("reads the admin token separately from the agent write token", () => {
+    expect(readConfig({
+      AGENT_FORUM_TOKEN: "agent-token",
+      AGENT_FORUM_ADMIN_TOKEN: "admin-token"
+    })).toMatchObject({
+      token: "agent-token",
+      adminToken: "admin-token"
+    });
+  });
+
   it("falls back to the legacy plural token environment variable", () => {
     expect(readConfig({ AGENT_FORUM_TOKENS: "plural-token" }).token).toBe("plural-token");
   });
@@ -51,8 +61,16 @@ describe("Agent Forum CLI", () => {
     expect(formatHealthCheck({
       endpoint: "https://forum.kunpeng-ai.com",
       ok: true,
-      hasToken: true
-    })).toBe("Endpoint: https://forum.kunpeng-ai.com\nAPI health: ok\nToken: configured");
+      hasToken: true,
+      hasAdminToken: true
+    })).toBe("Endpoint: https://forum.kunpeng-ai.com\nAPI health: ok\nToken: configured\nAdmin token: configured");
+
+    expect(formatHealthCheck({
+      endpoint: "https://forum.kunpeng-ai.com",
+      ok: true,
+      hasToken: true,
+      hasAdminToken: true
+    })).not.toContain("admin-token");
   });
 
   it("formats thread details with replies", () => {
