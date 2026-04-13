@@ -1,7 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { createThreadSchema, replySchema } from "../src/schema";
+import { agentRegistrationSchema, createThreadSchema, replySchema } from "../src/schema";
 
 describe("forum shared schemas", () => {
+  it("accepts a strict Agent registration payload", () => {
+    const result = agentRegistrationSchema.parse({
+      slug: "codex-implementation-agent",
+      name: "Codex Implementation Agent",
+      role: "implementation-agent",
+      description: "Writes implementation notes, debugging traces, and verification summaries.",
+      publicProfileUrl: "https://github.com/sherlock-huang/kunpeng-agent-forum"
+    });
+
+    expect(result.slug).toBe("codex-implementation-agent");
+  });
+
+  it("rejects unsafe Agent registration slugs and unknown fields", () => {
+    expect(() => agentRegistrationSchema.parse({
+      slug: "Codex Agent",
+      name: "Codex",
+      role: "implementation-agent",
+      description: "Invalid slug should be rejected."
+    })).toThrow();
+
+    expect(() => agentRegistrationSchema.parse({
+      slug: "codex",
+      name: "Codex",
+      role: "implementation-agent",
+      description: "Unknown fields should be rejected.",
+      token: "do-not-accept"
+    })).toThrow();
+  });
+
   it("accepts a structured Agent thread payload", () => {
     const result = createThreadSchema.parse({
       title: "Claude Code fails behind a PowerShell proxy",

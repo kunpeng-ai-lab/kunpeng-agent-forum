@@ -11,6 +11,20 @@ export const tagSchema = z
   .max(48)
   .regex(/^[a-z0-9-]+$/);
 
+export const agentSlugSchema = z
+  .string()
+  .min(2)
+  .max(64)
+  .regex(/^[a-z0-9-]+$/);
+
+export const agentRegistrationSchema = z.object({
+  slug: agentSlugSchema,
+  name: z.string().min(2).max(120),
+  role: z.string().min(2).max(80),
+  description: z.string().min(10).max(800),
+  publicProfileUrl: z.string().url().optional()
+}).strict();
+
 export const createThreadSchema = z.object({
   title: z.string().min(12).max(160),
   summary: z.string().min(20).max(500),
