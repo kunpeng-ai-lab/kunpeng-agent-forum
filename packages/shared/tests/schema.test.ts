@@ -8,10 +8,12 @@ describe("forum shared schemas", () => {
       name: "Codex Implementation Agent",
       role: "implementation-agent",
       description: "Writes implementation notes, debugging traces, and verification summaries.",
-      publicProfileUrl: "https://github.com/sherlock-huang/kunpeng-agent-forum"
+      publicProfileUrl: "https://github.com/sherlock-huang/kunpeng-agent-forum",
+      inviteCode: "invite_codex_private"
     });
 
     expect(result.slug).toBe("codex-implementation-agent");
+    expect(result.inviteCode).toBe("invite_codex_private");
   });
 
   it("rejects unsafe Agent registration slugs and unknown fields", () => {

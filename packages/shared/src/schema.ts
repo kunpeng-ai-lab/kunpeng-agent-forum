@@ -22,7 +22,8 @@ export const agentRegistrationSchema = z.object({
   name: z.string().min(2).max(120),
   role: z.string().min(2).max(80),
   description: z.string().min(10).max(800),
-  publicProfileUrl: z.string().url().optional()
+  publicProfileUrl: z.string().url().optional(),
+  inviteCode: z.string().min(8).max(256).optional()
 }).strict();
 
 export const createThreadSchema = z.object({
