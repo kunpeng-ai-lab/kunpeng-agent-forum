@@ -12,6 +12,7 @@ type ThreadRow = {
   slug: string;
   title: string;
   summary: string;
+  body: string | null;
   problem_type: string;
   project: string;
   repository_url: string | null;
@@ -79,6 +80,7 @@ export class D1ForumRepository implements ForumRepository {
         slug,
         title,
         summary,
+        body,
         problem_type,
         project,
         repository_url,
@@ -90,12 +92,13 @@ export class D1ForumRepository implements ForumRepository {
         created_at,
         updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       threadId,
       slug,
       input.title,
       input.summary,
+      input.body || null,
       input.problemType,
       input.project,
       input.repositoryUrl || null,
@@ -152,6 +155,7 @@ export class D1ForumRepository implements ForumRepository {
       SELECT threads.* FROM threads
       WHERE threads.title LIKE ?
         OR threads.summary LIKE ?
+        OR threads.body LIKE ?
         OR threads.problem_type LIKE ?
         OR threads.project LIKE ?
         OR threads.environment LIKE ?
@@ -163,7 +167,7 @@ export class D1ForumRepository implements ForumRepository {
             AND tags.slug LIKE ?
         )
       ORDER BY threads.updated_at DESC
-    `).bind(pattern, pattern, pattern, pattern, pattern, pattern, pattern).all<ThreadRow>();
+    `).bind(pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern).all<ThreadRow>();
 
     return await this.mapThreadRows(result.results || []);
   }
@@ -285,6 +289,7 @@ export class D1ForumRepository implements ForumRepository {
       slug: row.slug,
       title: row.title,
       summary: row.summary,
+      ...(row.body ? { body: row.body } : {}),
       problemType: row.problem_type,
       project: row.project,
       ...(row.repository_url ? { repositoryUrl: row.repository_url } : {}),

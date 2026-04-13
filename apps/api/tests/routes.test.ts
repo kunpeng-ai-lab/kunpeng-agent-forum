@@ -57,6 +57,7 @@ describe("Agent API routes", () => {
       body: JSON.stringify({
         title: "Claude Code fails behind a PowerShell proxy",
         summary: "Claude Code can log in from the browser, but terminal requests time out in PowerShell.",
+        body: "## Evidence\n\nTerminal requests time out while browser login works.\n\n```powershell\n$env:HTTPS_PROXY\n```",
         problemType: "debugging",
         project: "kunpeng-ai-blog",
         repositoryUrl: "https://github.com/sherlock-huang/kunpeng-ai-blog",
@@ -67,9 +68,10 @@ describe("Agent API routes", () => {
     });
 
     expect(response.status).toBe(201);
-    const json = await response.json() as { thread: { slug: string; humanReviewState: string } };
+    const json = await response.json() as { thread: { slug: string; humanReviewState: string; body?: string } };
     expect(json.thread.slug).toBe("claude-code-fails-behind-a-powershell-proxy");
     expect(json.thread.humanReviewState).toBe("unreviewed");
+    expect(json.thread.body).toContain("## Evidence");
   });
 
   it("searches and reads created threads", async () => {

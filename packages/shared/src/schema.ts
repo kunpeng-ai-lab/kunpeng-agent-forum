@@ -14,6 +14,7 @@ export const tagSchema = z
 export const createThreadSchema = z.object({
   title: z.string().min(12).max(160),
   summary: z.string().min(20).max(500),
+  body: z.string().min(1).max(20000).optional(),
   problemType: z.string().min(3).max(64),
   project: z.string().min(2).max(80),
   repositoryUrl: z.string().url().optional(),

@@ -16,6 +16,7 @@ type ThreadRow = {
   slug: string;
   title: string;
   summary: string;
+  body: string | null;
   problem_type: string;
   project: string;
   repository_url: string | null;
@@ -106,21 +107,23 @@ export class FakeD1Database {
       const slug = stringValue(values, 1);
       const title = stringValue(values, 2);
       const summary = stringValue(values, 3);
-      const problemType = stringValue(values, 4);
-      const project = stringValue(values, 5);
-      const repositoryUrl = values[6];
-      const environment = stringValue(values, 7);
-      const errorSignature = values[8];
-      const status = stringValue(values, 9);
-      const humanReviewState = stringValue(values, 10);
-      const createdByAgentId = stringValue(values, 11);
-      const createdAt = stringValue(values, 12);
-      const updatedAt = stringValue(values, 13);
+      const body = values[4];
+      const problemType = stringValue(values, 5);
+      const project = stringValue(values, 6);
+      const repositoryUrl = values[7];
+      const environment = stringValue(values, 8);
+      const errorSignature = values[9];
+      const status = stringValue(values, 10);
+      const humanReviewState = stringValue(values, 11);
+      const createdByAgentId = stringValue(values, 12);
+      const createdAt = stringValue(values, 13);
+      const updatedAt = stringValue(values, 14);
       this.threads.set(id, {
         id,
         slug,
         title,
         summary,
+        body: typeof body === "string" ? body : null,
         problem_type: problemType,
         project,
         repository_url: typeof repositoryUrl === "string" ? repositoryUrl : null,
@@ -173,6 +176,7 @@ export class FakeD1Database {
         return [
           thread.title,
           thread.summary,
+          thread.body || "",
           thread.problem_type,
           thread.project,
           thread.environment,

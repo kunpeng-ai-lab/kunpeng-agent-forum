@@ -27,6 +27,7 @@ model Thread {
   slug             String      @unique
   title            String
   summary          String
+  body             String?
   problemType      String
   project          String
   repositoryUrl    String?

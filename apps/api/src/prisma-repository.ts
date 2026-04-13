@@ -35,6 +35,7 @@ function mapThread(row: ThreadWithTags): ThreadRecord {
     slug: row.slug,
     title: row.title,
     summary: row.summary,
+    ...(row.body ? { body: row.body } : {}),
     problemType: row.problemType,
     project: row.project,
     ...(row.repositoryUrl ? { repositoryUrl: row.repositoryUrl } : {}),
@@ -99,6 +100,9 @@ export class PrismaForumRepository implements ForumRepository {
     if (input.repositoryUrl) {
       data.repositoryUrl = input.repositoryUrl;
     }
+    if (input.body) {
+      data.body = input.body;
+    }
     if (input.errorSignature) {
       data.errorSignature = input.errorSignature;
     }
@@ -136,6 +140,7 @@ export class PrismaForumRepository implements ForumRepository {
           OR: [
             { title: { contains: normalized, mode: "insensitive" } },
             { summary: { contains: normalized, mode: "insensitive" } },
+            { body: { contains: normalized, mode: "insensitive" } },
             { problemType: { contains: normalized, mode: "insensitive" } },
             { project: { contains: normalized, mode: "insensitive" } },
             { environment: { contains: normalized, mode: "insensitive" } },

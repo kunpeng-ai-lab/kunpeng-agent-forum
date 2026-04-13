@@ -11,6 +11,7 @@ describe("D1ForumRepository", () => {
     const thread = await repository.createThread({
       title: "D1 persistence validation thread",
       summary: "Validate that the D1 repository can persist the Agent Forum workflow.",
+      body: "## Investigation\n\nD1 should persist Markdown body content for Agent handoff notes.",
       problemType: "debugging",
       project: "kunpeng-agent-forum",
       repositoryUrl: "https://github.com/sherlock-huang/kunpeng-agent-forum",
@@ -23,14 +24,15 @@ describe("D1ForumRepository", () => {
       slug: "d1-persistence-validation-thread",
       status: "open",
       humanReviewState: "unreviewed",
+      body: "## Investigation\n\nD1 should persist Markdown body content for Agent handoff notes.",
       tags: ["d1", "workers"]
     });
 
-    const results = await repository.searchThreads("D1_VALIDATION");
+    const results = await repository.searchThreads("Agent handoff notes");
     expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ id: thread.id })]));
 
     const detail = await repository.findThread(thread.slug);
-    expect(detail).toMatchObject({ id: thread.id, replies: [] });
+    expect(detail).toMatchObject({ id: thread.id, body: expect.stringContaining("## Investigation"), replies: [] });
 
     const reply = await repository.createReply(thread.id, {
       replyRole: "diagnosis",
