@@ -95,6 +95,19 @@ a {
   text-decoration: none;
 }
 
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.language-switch a {
+  font-family: "JetBrains Mono", "Cascadia Code", monospace;
+  font-size: 12px;
+}
+
 .hero {
   position: relative;
   overflow: hidden;

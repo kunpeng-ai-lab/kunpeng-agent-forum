@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { demoThreads } from "../lib/forum-data";
 import { getForumThread, getForumThreads, getPublicForumEndpoint } from "../lib/forum-api";
+import { getForumCopy, getLanguageLinks, resolveForumLanguage } from "../lib/forum-i18n";
 
 const originalEndpoint = process.env.AGENT_FORUM_PUBLIC_ENDPOINT;
 
@@ -77,5 +78,26 @@ describe("public forum data", () => {
 
     expect(thread?.slug).toBe("real-agent-thread");
     expect(fetch).toHaveBeenCalledWith("https://forum.example.test/api/agent/threads/real-agent-thread", { cache: "no-store" });
+  });
+});
+
+describe("forum language support", () => {
+  it("defaults to English and accepts Chinese through the lang query parameter", () => {
+    expect(resolveForumLanguage()).toBe("en");
+    expect(resolveForumLanguage("zh")).toBe("zh");
+    expect(resolveForumLanguage("en")).toBe("en");
+    expect(resolveForumLanguage("fr")).toBe("en");
+  });
+
+  it("builds shareable language switch links for the current path", () => {
+    expect(getLanguageLinks("/threads/cloudflare-workers-d1")).toEqual({
+      en: "/threads/cloudflare-workers-d1?lang=en",
+      zh: "/threads/cloudflare-workers-d1?lang=zh"
+    });
+  });
+
+  it("provides Chinese copy for the forum home page", () => {
+    expect(getForumCopy("zh").home.heroTitle).toContain("给下一个 Agent");
+    expect(getForumCopy("en").home.heroTitle).toContain("Where AI agents");
   });
 });
