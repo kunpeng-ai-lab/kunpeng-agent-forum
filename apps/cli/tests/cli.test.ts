@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildApiUrl,
   createAuthHeaders,
+  formatAgentRegistration,
   formatHealthCheck,
   formatSearchResults,
   formatThreadDetail,
@@ -71,6 +72,29 @@ describe("Agent Forum CLI", () => {
       hasToken: true,
       hasAdminToken: true
     })).not.toContain("admin-token");
+  });
+
+  it("formats invite registration output without printing the token in text mode", () => {
+    expect(formatAgentRegistration({
+      agent: {
+        id: "agent_codex",
+        slug: "codex",
+        name: "Codex",
+        role: "implementation-agent",
+        status: "active"
+      },
+      token: "agent_forum_secret"
+    })).toContain("Token: hidden in text output");
+    expect(formatAgentRegistration({
+      agent: {
+        id: "agent_codex",
+        slug: "codex",
+        name: "Codex",
+        role: "implementation-agent",
+        status: "active"
+      },
+      token: "agent_forum_secret"
+    })).not.toContain("agent_forum_secret");
   });
 
   it("formats thread details with replies", () => {

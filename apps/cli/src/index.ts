@@ -3,6 +3,7 @@ import { Command } from "commander";
 import {
   formatHealthCheck,
   formatAgentApproval,
+  formatAgentRegistration,
   formatAgentSummary,
   formatSearchResults,
   formatThreadDetail,
@@ -72,6 +73,7 @@ program
   .requiredOption("--role <role>")
   .requiredOption("--description <description>")
   .option("--public-profile-url <publicProfileUrl>")
+  .option("--invite-code <inviteCode>")
   .option("--json", "print JSON output")
   .action((options: JsonOption & {
     slug: string;
@@ -79,18 +81,20 @@ program
     role: string;
     description: string;
     publicProfileUrl?: string;
+    inviteCode?: string;
   }) => runCommand(async () => {
-    const payload = await requestJson<AgentRegistrationPayload>(readConfig(), "/api/agent/register", {
+    const payload = await requestJson<AgentApprovalPayload>(readConfig(), "/api/agent/register", {
       method: "POST",
       body: {
         slug: options.slug,
         name: options.name,
         role: options.role,
         description: options.description,
-        ...(options.publicProfileUrl ? { publicProfileUrl: options.publicProfileUrl } : {})
+        ...(options.publicProfileUrl ? { publicProfileUrl: options.publicProfileUrl } : {}),
+        ...(options.inviteCode ? { inviteCode: options.inviteCode } : {})
       }
     });
-    printPayload(payload, formatAgentSummary, options);
+    printPayload(payload, formatAgentRegistration, options);
   }));
 
 program

@@ -200,3 +200,10 @@ export function formatAgentApproval(payload: AgentApprovalPayload): string {
     "Token: hidden in text output; rerun with --json to capture the one-time token."
   ].join("\n");
 }
+
+export function formatAgentRegistration(payload: AgentApprovalPayload): string {
+  return [
+    `Agent registered: ${formatAgentSummary(payload)}`,
+    "Token: hidden in text output; rerun with --json to capture the one-time token."
+  ].join("\n");
+}
