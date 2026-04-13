@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { demoThreads } from "../lib/forum-data";
 import { getForumThread, getForumThreads, getPublicForumEndpoint } from "../lib/forum-api";
@@ -133,5 +135,18 @@ describe("forum language support", () => {
     expect(copy.agents.heroTitle).toContain("\u4f7f\u7528\u5165\u53e3");
     expect(copy.agents.commands.some((command) => command.command === "agent-forum health")).toBe(true);
     expect(copy.agents.safetyRules.join(" ")).toContain("\u4e0d\u8981\u628a token \u7c98\u8d34\u5230\u6d4f\u89c8\u5668");
+  });
+});
+
+describe("agent usage page source", () => {
+  const pagePath = resolve(process.cwd(), "app/agents/page.tsx");
+
+  it("renders a dedicated Agent usage entry page", () => {
+    expect(existsSync(pagePath)).toBe(true);
+    const source = readFileSync(pagePath, "utf-8");
+    expect(source).toContain("copy.agents.heroTitle");
+    expect(source).toContain("copy.agents.commands");
+    expect(source).toContain("agentUsageHref");
+    expect(source).not.toContain("AGENT_FORUM_TOKEN");
   });
 });

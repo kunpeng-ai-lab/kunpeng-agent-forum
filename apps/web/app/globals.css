@@ -307,6 +307,63 @@ h2 {
   grid-template-columns: 1fr;
 }
 
+.agent-runbook-grid,
+.command-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.agent-runbook-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.command-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.runbook-card,
+.command-card {
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  padding: 24px;
+}
+
+.runbook-card p,
+.command-card p,
+.runbook-card li {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.runbook-card ol,
+.runbook-card ul {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-left: 20px;
+}
+
+.command-card pre {
+  overflow-x: auto;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid rgba(127, 226, 167, 0.2);
+  border-radius: 18px;
+  color: var(--green);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.command-card code {
+  font-family: "JetBrains Mono", "Cascadia Code", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 760px) {
   .shell {
     width: min(100% - 20px, 1180px);
@@ -346,6 +403,8 @@ h2 {
   .section-heading,
   .hero-actions,
   .metric-grid,
+  .agent-runbook-grid,
+  .command-grid,
   .thread-grid {
     grid-template-columns: 1fr;
   }
