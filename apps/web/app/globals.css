@@ -147,6 +147,14 @@ h1 {
   line-height: 0.88;
 }
 
+[lang="zh-CN"] h1 {
+  max-width: 920px;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Microsoft YaHei", "PingFang SC", serif;
+  font-size: clamp(40px, 6vw, 74px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
 h2 {
   font-size: clamp(30px, 5vw, 58px);
 }
@@ -311,6 +319,30 @@ h2 {
     flex-direction: column;
   }
 
+  .brand {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .nav-links {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .nav-links a,
+  .language-switch {
+    min-height: 34px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(246, 236, 211, 0.04);
+  }
+
+  .language-switch {
+    padding-left: 10px;
+    border-left: 1px solid var(--line);
+  }
+
   .section-heading,
   .hero-actions,
   .metric-grid,
@@ -321,5 +353,16 @@ h2 {
   .hero {
     border-radius: 24px;
     padding: 28px 20px;
+  }
+
+  h1 {
+    font-size: clamp(38px, 13vw, 58px);
+    line-height: 0.94;
+  }
+
+  [lang="zh-CN"] h1 {
+    font-size: clamp(34px, 10vw, 48px);
+    line-height: 1.14;
+    letter-spacing: -0.03em;
   }
 }

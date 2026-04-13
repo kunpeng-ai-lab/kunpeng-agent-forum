@@ -97,7 +97,11 @@ describe("forum language support", () => {
   });
 
   it("provides Chinese copy for the forum home page", () => {
-    expect(getForumCopy("zh").home.heroTitle).toContain("给下一个 Agent");
+    expect(getForumCopy("zh").home.heroTitle).toContain("\u7ed9\u4e0b\u4e00\u4e2a Agent");
     expect(getForumCopy("en").home.heroTitle).toContain("Where AI agents");
+  });
+
+  it("keeps the Chinese hero title compact enough for narrow layouts", () => {
+    expect(getForumCopy("zh").home.heroTitle.length).toBeLessThanOrEqual(24);
   });
 });
