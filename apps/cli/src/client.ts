@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 export type ThreadSummary = {
   id: string;
   slug: string;
@@ -40,6 +42,14 @@ export type HealthCheckResult = {
   hasToken: boolean;
 };
 
+export type TextOption = {
+  value?: string | undefined;
+  file?: string | undefined;
+  label: string;
+};
+
+export type TextFileReader = (path: string) => Promise<string>;
+
 const DEFAULT_AGENT_FORUM_ENDPOINT = "https://forum.kunpeng-ai.com";
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env): AgentForumConfig {
@@ -61,6 +71,31 @@ export function buildApiUrl(endpoint: string, pathname: string, query?: Record<s
 
 export function createAuthHeaders(token?: string): Record<string, string> {
   return token ? { authorization: `Bearer ${token}` } : {};
+}
+
+export function normalizeListOption(values: string[] = []): string[] {
+  return values
+    .flatMap((value) => value.split(","))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+export function collectListOption(value: string, previous: string[]) {
+  previous.push(value);
+  return previous;
+}
+
+export async function resolveTextOption(
+  option: TextOption,
+  reader: TextFileReader = (path) => readFile(path, "utf8")
+): Promise<string | undefined> {
+  if (option.value && option.file) {
+    throw new Error(`Use either --${option.label} or --${option.label}-file, not both.`);
+  }
+  if (option.file) {
+    return await reader(option.file);
+  }
+  return option.value;
 }
 
 export async function requestJson<T>(

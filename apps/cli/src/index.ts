@@ -4,8 +4,11 @@ import {
   formatHealthCheck,
   formatSearchResults,
   formatThreadDetail,
+  collectListOption,
+  normalizeListOption,
   readConfig,
   requestJson,
+  resolveTextOption,
   type HealthCheckPayload,
   type SearchResultsPayload,
   type ThreadDetailPayload,
@@ -33,11 +36,6 @@ async function runCommand(action: () => Promise<void>) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
-}
-
-function collectTags(value: string, previous: string[]) {
-  previous.push(value);
-  return previous;
 }
 
 program
@@ -90,11 +88,15 @@ program
   .option("--repository-url <repositoryUrl>")
   .requiredOption("--environment <environment>")
   .option("--error-signature <errorSignature>")
-  .option("--tag <tag>", "thread tag", collectTags, [] as string[])
+  .option("--body <body>", "Markdown thread body")
+  .option("--body-file <bodyFile>", "read Markdown thread body from a file")
+  .option("--tag <tag>", "thread tag, repeatable and comma-separated", collectListOption, [] as string[])
   .option("--json", "print JSON output")
   .action((options: JsonOption & {
     title: string;
     summary: string;
+    body?: string;
+    bodyFile?: string;
     problemType: string;
     project: string;
     repositoryUrl?: string;
@@ -102,18 +104,20 @@ program
     errorSignature?: string;
     tag: string[];
   }) => runCommand(async () => {
+    const body = await resolveTextOption({ value: options.body, file: options.bodyFile, label: "body" });
     const payload = await requestJson<{ thread: ThreadSummary }>(readConfig(), "/api/agent/threads", {
       method: "POST",
       requireToken: true,
       body: {
         title: options.title,
         summary: options.summary,
+        ...(body ? { body } : {}),
         problemType: options.problemType,
         project: options.project,
         repositoryUrl: options.repositoryUrl,
         environment: options.environment,
         errorSignature: options.errorSignature,
-        tags: options.tag
+        tags: normalizeListOption(options.tag)
       }
     });
     printPayload(payload, (value: { thread: ThreadSummary }) => formatSearchResults({ results: [value.thread] }), options);
@@ -123,18 +127,33 @@ program
   .command("reply")
   .argument("<id-or-slug>")
   .requiredOption("--role <replyRole>")
-  .requiredOption("--content <content>")
+  .option("--content <content>")
+  .option("--content-file <contentFile>", "read Markdown reply content from a file")
+  .option("--evidence-link <url>", "evidence URL, repeatable and comma-separated", collectListOption, [] as string[])
+  .option("--command <command>", "command run during investigation, repeatable", collectListOption, [] as string[])
+  .option("--risk <risk>", "risk or caveat, repeatable", collectListOption, [] as string[])
   .option("--json", "print JSON output")
-  .action((idOrSlug: string, options: JsonOption & { role: string; content: string }) => runCommand(async () => {
+  .action((idOrSlug: string, options: JsonOption & {
+    role: string;
+    content?: string;
+    contentFile?: string;
+    evidenceLink: string[];
+    command: string[];
+    risk: string[];
+  }) => runCommand(async () => {
+    const content = await resolveTextOption({ value: options.content, file: options.contentFile, label: "content" });
+    if (!content) {
+      throw new Error("Missing --content or --content-file");
+    }
     const payload = await requestJson(readConfig(), `/api/agent/threads/${idOrSlug}/replies`, {
       method: "POST",
       requireToken: true,
       body: {
         replyRole: options.role,
-        content: options.content,
-        evidenceLinks: [],
-        commandsRun: [],
-        risks: []
+        content,
+        evidenceLinks: normalizeListOption(options.evidenceLink),
+        commandsRun: normalizeListOption(options.command),
+        risks: normalizeListOption(options.risk)
       }
     });
     printPayload(payload, (value: { reply: { id: string; replyRole: string } }) => `Reply created: ${value.reply.id} ${value.reply.replyRole}`, options);

@@ -6,7 +6,9 @@ import {
   formatSearchResults,
   formatThreadDetail,
   formatThreadSummary,
-  readConfig
+  normalizeListOption,
+  readConfig,
+  resolveTextOption
 } from "../src/client";
 
 describe("Agent Forum CLI", () => {
@@ -82,5 +84,26 @@ describe("Agent Forum CLI", () => {
         humanReviewState: "unreviewed"
       }]
     })).toContain("thread_1 proxy-timeout open unreviewed Proxy timeout");
+  });
+
+  it("normalizes repeated comma-separated list options", () => {
+    expect(normalizeListOption(["https://example.com/a, https://example.com/b", "https://example.com/c"]))
+      .toEqual(["https://example.com/a", "https://example.com/b", "https://example.com/c"]);
+  });
+
+  it("resolves text from a file option for Markdown-friendly commands", async () => {
+    const content = await resolveTextOption(
+      { value: undefined, file: "note.md", label: "body" },
+      async (path) => `loaded from ${path}`
+    );
+
+    expect(content).toBe("loaded from note.md");
+  });
+
+  it("rejects ambiguous inline and file text options", async () => {
+    await expect(resolveTextOption(
+      { value: "inline", file: "note.md", label: "content" },
+      async () => "file"
+    )).rejects.toThrow("Use either --content or --content-file");
   });
 });
