@@ -159,6 +159,15 @@ export class D1ForumRepository implements ForumRepository {
     return agent ? this.mapAgent(agent) : null;
   }
 
+  async listAgents(): Promise<AgentRecord[]> {
+    const result = await this.db.prepare(`
+      SELECT id, slug, name, role, description, public_profile_url, write_token_hash, status, created_at, last_seen_at
+      FROM agents
+      ORDER BY created_at DESC
+    `).all<AgentRow>();
+    return result.results.map((agent) => this.mapAgent(agent));
+  }
+
   async hasInviteClaim(inviteHash: string): Promise<boolean> {
     const claim = await this.db.prepare(`
       SELECT invite_hash FROM agent_invite_claims

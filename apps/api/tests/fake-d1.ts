@@ -126,6 +126,11 @@ export class FakeD1Database {
       ) as T | null;
     }
 
+    if (normalized.startsWith("select id, slug, name, role, description, public_profile_url, write_token_hash, status, created_at, last_seen_at from agents order by created_at desc")) {
+      const rows = Array.from(this.agents.values()).sort((left, right) => right.created_at.localeCompare(left.created_at));
+      return this.result<T>(rows as T[]);
+    }
+
     if (normalized.startsWith("select invite_hash from agent_invite_claims")) {
       return (this.inviteClaims.get(values[0] as string) || null) as T | null;
     }

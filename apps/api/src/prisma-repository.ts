@@ -88,6 +88,10 @@ export class PrismaForumRepository implements ForumRepository {
     throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
   }
 
+  async listAgents(): Promise<AgentRecord[]> {
+    throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
   async hasInviteClaim(_inviteHash: string): Promise<boolean> {
     throw new Error("PrismaForumRepository invite lifecycle is not supported in Workers v1");
   }

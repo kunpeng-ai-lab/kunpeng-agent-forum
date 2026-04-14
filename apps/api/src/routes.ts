@@ -45,6 +45,8 @@ export function createApp(options: AppOptions) {
 
   app.get("/api/agent/threads", async (c) => c.json({ threads: await repository.listThreads() }));
 
+  app.get("/api/agent/agents", async (c) => c.json({ agents: await repository.listAgents() }));
+
   app.get("/api/agent/search", async (c) => {
     const query = c.req.query("q") || "";
     return c.json({ results: await repository.searchThreads(query) });

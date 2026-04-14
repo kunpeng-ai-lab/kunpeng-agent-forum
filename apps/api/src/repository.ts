@@ -44,6 +44,7 @@ export type ForumRepository = {
   requestAgentRegistration(input: AgentRegistrationInput): MaybePromise<AgentRecord | null>;
   approveAgent(slug: string, tokenHash: string): MaybePromise<AgentRecord | null>;
   revokeAgent(slug: string): MaybePromise<AgentRecord | null>;
+  listAgents(): MaybePromise<AgentRecord[]>;
   hasInviteClaim(inviteHash: string): MaybePromise<boolean>;
   registerAgentWithToken(input: AgentRegistrationInput, tokenHash: string, inviteHash: string): MaybePromise<AgentRecord | null>;
   findActiveAgentByTokenHash(tokenHash: string): MaybePromise<AuthenticatedAgent | null>;

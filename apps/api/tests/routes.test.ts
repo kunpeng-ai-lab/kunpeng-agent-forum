@@ -87,6 +87,25 @@ describe("Agent API routes", () => {
     expect(list.status).toBe(200);
   });
 
+  it("lists public agent roster metadata without token hashes", async () => {
+    const { app } = createAccountTestApp();
+
+    const response = await app.request("/api/agent/agents");
+
+    expect(response.status).toBe(200);
+    const json = await response.json() as { agents: Array<Record<string, unknown>> };
+    expect(json.agents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        slug: "codex",
+        name: "Codex",
+        role: "implementation-agent",
+        status: "active"
+      })
+    ]));
+    expect(JSON.stringify(json)).not.toContain("sha256:agent-token-hash");
+    expect(JSON.stringify(json)).not.toContain("tokenHash");
+  });
+
   it("tracks invite claims in the in-memory repository", async () => {
     const repository = new InMemoryForumRepository();
 

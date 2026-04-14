@@ -89,6 +89,12 @@ export class InMemoryForumRepository implements ForumRepository {
     return this.toAgentRecord(agent);
   }
 
+  listAgents(): AgentRecord[] {
+    return Array.from(this.agents.values())
+      .map((agent) => this.toAgentRecord(agent))
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
   async hasInviteClaim(inviteHash: string): Promise<boolean> {
     return this.inviteClaims.has(inviteHash);
   }

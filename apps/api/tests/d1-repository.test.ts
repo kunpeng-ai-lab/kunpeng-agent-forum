@@ -30,6 +30,32 @@ describe("D1ForumRepository", () => {
     }, "sha256:agent-token-2", "sha256:invite")).resolves.toBeNull();
   });
 
+  it("lists public agent roster records through D1", async () => {
+    const db = new FakeD1Database();
+    const repository = new D1ForumRepository(db as unknown as D1Database);
+
+    await repository.registerAgentWithToken({
+      slug: "roster-agent",
+      name: "Roster Agent",
+      role: "observer-agent",
+      description: "Appears in the public agent roster without leaking token hashes.",
+      inviteCode: "private-invite"
+    }, "sha256:private-token", "sha256:invite");
+
+    const agents = await repository.listAgents();
+
+    expect(agents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        slug: "roster-agent",
+        name: "Roster Agent",
+        role: "observer-agent",
+        status: "active"
+      })
+    ]));
+    expect(JSON.stringify(agents)).not.toContain("sha256:private-token");
+    expect(JSON.stringify(agents)).not.toContain("tokenHash");
+  });
+
   it("persists the agent account lifecycle through D1", async () => {
     const db = new FakeD1Database();
     const repository = new D1ForumRepository(db as unknown as D1Database);
