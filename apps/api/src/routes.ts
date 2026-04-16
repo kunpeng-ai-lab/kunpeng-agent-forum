@@ -4,7 +4,6 @@ import { z } from "zod";
 import { extractBearerToken, generateAgentToken, hashAgentToken, verifyAdminToken } from "./auth";
 import { generateInviteEntries } from "./invite-generator";
 import { InMemoryForumRepository } from "./in-memory-repository";
-import { findMatchingInvite, parseInviteConfig } from "./invites";
 import type { ForumRepository, InviteRegistryRecord } from "./repository";
 
 export type AppOptions = {
@@ -40,7 +39,6 @@ export function createApp(options: AppOptions) {
   const repository = options.repository || new InMemoryForumRepository();
   const hashToken = options.hashToken || hashAgentToken;
   const generateToken = options.generateToken || generateAgentToken;
-  const invites = [...parseInviteConfig(options.inviteConfig)];
   const statusUpdateSchema = z.object({
     status: z.literal("solved"),
     summary: z.string().min(1).max(8000)
@@ -87,20 +85,26 @@ export function createApp(options: AppOptions) {
       return c.json({ error: "invalid_agent_registration_payload", details: parsed.error.flatten() }, 400);
     }
 
-    const invite = findMatchingInvite(invites, parsed.data.slug, parsed.data.inviteCode);
-    if (!invite) {
-      const codeExists = Boolean(parsed.data.inviteCode && invites.some((item) => item.code === parsed.data.inviteCode));
-      return c.json({ error: codeExists ? "invite_slug_mismatch" : "invalid_invite_code" }, codeExists ? 403 : 401);
+    if (!parsed.data.inviteCode) {
+      return c.json({ error: "invalid_invite_code" }, 401);
     }
 
-    const inviteHash = await hashToken(invite.code);
+    const inviteHash = await hashToken(parsed.data.inviteCode);
+    const inviteRegistry = await repository.findInviteRegistryByHash(inviteHash);
+    if (!inviteRegistry) {
+      return c.json({ error: "invite_not_registered_for_operator_tracking" }, 403);
+    }
+
+    if (inviteRegistry.expectedSlug && inviteRegistry.expectedSlug !== parsed.data.slug) {
+      return c.json({ error: "invite_slug_mismatch" }, 403);
+    }
+
+    if (inviteRegistry.status !== "issued") {
+      return c.json({ error: inviteRegistry.status === "claimed" || inviteRegistry.status === "posted" ? "invite_already_claimed" : "invite_not_registered_for_operator_tracking" }, inviteRegistry.status === "claimed" || inviteRegistry.status === "posted" ? 409 : 403);
+    }
+
     if (await repository.hasInviteClaim(inviteHash)) {
       return c.json({ error: "invite_already_claimed" }, 409);
-    }
-
-    const inviteRegistry = await repository.findInviteRegistryByHash(inviteHash);
-    if (!inviteRegistry || inviteRegistry.status !== "issued") {
-      return c.json({ error: "invite_not_registered_for_operator_tracking" }, 403);
     }
 
     const token = generateToken();
@@ -191,10 +195,6 @@ export function createApp(options: AppOptions) {
         ...(invite.note ? { note: invite.note } : {})
       };
       const record = await repository.createInviteRegistryEntry(createInput);
-      invites.push({
-        code: generated.code,
-        ...(invite.expectedSlug ? { slug: invite.expectedSlug } : {})
-      });
       created.push({ code: generated.code, record: toAdminInviteRecord(record) });
     }
 

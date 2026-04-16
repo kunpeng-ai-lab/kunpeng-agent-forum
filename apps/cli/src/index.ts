@@ -4,6 +4,8 @@ import {
   formatHealthCheck,
   formatAgentApproval,
   formatAgentRegistration,
+  formatInviteCreation,
+  formatInviteList,
   formatAgentSummary,
   formatSearchResults,
   formatThreadDetail,
@@ -16,6 +18,8 @@ import {
   type AgentIdentityPayload,
   type AgentRegistrationPayload,
   type HealthCheckPayload,
+  type InviteCreationPayload,
+  type InviteListPayload,
   type SearchResultsPayload,
   type ThreadDetailPayload,
   type ThreadSummary
@@ -225,6 +229,10 @@ const admin = program
   .command("admin")
   .description("operator-only Agent account administration");
 
+const adminInvites = admin
+  .command("invites")
+  .description("operator-only invite registry management");
+
 admin
   .command("approve")
   .argument("<slug>")
@@ -257,6 +265,78 @@ admin
       { method: "POST", requireToken: true }
     );
     printPayload(payload, formatAgentSummary, options);
+  }));
+
+adminInvites
+  .command("create")
+  .requiredOption("--batch <batchName>")
+  .option("--count <count>", "number of one-time invite codes to create", "1")
+  .option("--issued-to <issuedTo>")
+  .option("--channel <channel>")
+  .option("--expected-slug <expectedSlug>")
+  .option("--agent-name <agentName>")
+  .option("--role <role>")
+  .option("--note <note>")
+  .option("--json", "print JSON output including the one-time invite codes")
+  .action((options: JsonOption & {
+    batch: string;
+    count: string;
+    issuedTo?: string;
+    channel?: string;
+    expectedSlug?: string;
+    agentName?: string;
+    role?: string;
+    note?: string;
+  }) => runCommand(async () => {
+    const config = readConfig();
+    if (!config.adminToken) {
+      throw new Error("Missing AGENT_FORUM_ADMIN_TOKEN");
+    }
+
+    const count = Number.parseInt(options.count, 10);
+    if (!Number.isInteger(count) || count < 1 || count > 50) {
+      throw new Error("Use --count with an integer between 1 and 50.");
+    }
+    if (options.expectedSlug && count !== 1) {
+      throw new Error("--expected-slug can only be used with --count 1.");
+    }
+
+    const invites = Array.from({ length: count }, () => ({
+      batchName: options.batch,
+      ...(options.issuedTo ? { issuedTo: options.issuedTo } : {}),
+      ...(options.channel ? { channel: options.channel } : {}),
+      ...(options.expectedSlug ? { expectedSlug: options.expectedSlug } : {}),
+      ...(options.agentName ? { agentName: options.agentName } : {}),
+      ...(options.role ? { role: options.role } : {}),
+      ...(options.note ? { note: options.note } : {})
+    }));
+
+    const payload = await requestJson<InviteCreationPayload>(
+      { ...config, token: config.adminToken },
+      "/api/admin/invites",
+      {
+        method: "POST",
+        requireToken: true,
+        body: { invites }
+      }
+    );
+    printPayload(payload, formatInviteCreation, options);
+  }));
+
+adminInvites
+  .command("list")
+  .option("--json", "print JSON output")
+  .action((options: JsonOption) => runCommand(async () => {
+    const config = readConfig();
+    if (!config.adminToken) {
+      throw new Error("Missing AGENT_FORUM_ADMIN_TOKEN");
+    }
+    const payload = await requestJson<InviteListPayload>(
+      { ...config, token: config.adminToken },
+      "/api/admin/invites",
+      { requireToken: true }
+    );
+    printPayload(payload, formatInviteList, options);
   }));
 
 program.parse(process.argv);

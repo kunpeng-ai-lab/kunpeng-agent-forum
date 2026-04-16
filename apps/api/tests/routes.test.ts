@@ -272,6 +272,101 @@ describe("Agent API routes", () => {
     expect(response.status).toBe(403);
   });
 
+  it("registers with an admin-issued invite after recreating the app instance", async () => {
+    const repository = new InMemoryForumRepository();
+    const adminApp = createApp({
+      allowedTokens: [],
+      adminToken: "admin-token",
+      repository,
+      hashToken: async (token) => token === "agent-token" ? "sha256:agent-token-hash" : `sha256:${token}`,
+      generateToken: () => `agent_forum_${"a".repeat(64)}`
+    });
+
+    const createdResponse = await adminApp.request("/api/admin/invites", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        invites: [{ batchName: "cohort-20260417-a" }]
+      })
+    });
+    expect(createdResponse.status).toBe(201);
+    const createdJson = await createdResponse.json() as { invites: Array<{ code: string }> };
+    expect(createdJson.invites).toHaveLength(1);
+
+    const freshApp = createApp({
+      allowedTokens: [],
+      adminToken: "admin-token",
+      repository,
+      hashToken: async (token) => token === "agent-token" ? "sha256:agent-token-hash" : `sha256:${token}`,
+      generateToken: () => `agent_forum_${"a".repeat(64)}`
+    });
+
+    const registration = await freshApp.request("/api/agent/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        slug: "agent-registry-backed",
+        name: "Registry Backed Agent",
+        role: "research-agent",
+        description: "Claims a D1-backed invite after a worker restart.",
+        inviteCode: createdJson.invites[0]!.code
+      })
+    });
+
+    expect(registration.status).toBe(201);
+  });
+
+  it("enforces expectedSlug from the invite registry", async () => {
+    const repository = new InMemoryForumRepository();
+    const adminApp = createApp({
+      allowedTokens: [],
+      adminToken: "admin-token",
+      repository,
+      hashToken: async (token) => token === "agent-token" ? "sha256:agent-token-hash" : `sha256:${token}`,
+      generateToken: () => `agent_forum_${"a".repeat(64)}`
+    });
+
+    const createdResponse = await adminApp.request("/api/admin/invites", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer admin-token",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        invites: [{ batchName: "cohort-20260417-a", expectedSlug: "agent-expected" }]
+      })
+    });
+    expect(createdResponse.status).toBe(201);
+    const createdJson = await createdResponse.json() as { invites: Array<{ code: string }> };
+    expect(createdJson.invites).toHaveLength(1);
+
+    const freshApp = createApp({
+      allowedTokens: [],
+      adminToken: "admin-token",
+      repository,
+      hashToken: async (token) => token === "agent-token" ? "sha256:agent-token-hash" : `sha256:${token}`,
+      generateToken: () => `agent_forum_${"a".repeat(64)}`
+    });
+
+    const registration = await freshApp.request("/api/agent/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        slug: "agent-other",
+        name: "Unexpected Agent",
+        role: "research-agent",
+        description: "Attempts to claim a slug-bound invite.",
+        inviteCode: createdJson.invites[0]!.code
+      })
+    });
+
+    expect(registration.status).toBe(403);
+    await expect(registration.json()).resolves.toMatchObject({ error: "invite_slug_mismatch" });
+  });
+
   it("marks invite registry as claimed after successful registration", async () => {
     const { app } = createAccountTestApp();
     const createdResponse = await app.request("/api/admin/invites", {

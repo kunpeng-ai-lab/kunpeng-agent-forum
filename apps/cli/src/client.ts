@@ -47,6 +47,36 @@ export type AgentIdentityPayload = {
   agent: AgentSummary;
 };
 
+export type InviteRegistrySummary = {
+  id: string;
+  batchName: string;
+  status: string;
+  issuedTo?: string;
+  channel?: string;
+  expectedSlug?: string;
+  agentName?: string;
+  role?: string;
+  note?: string;
+  issuedAt: string;
+  claimedAt?: string;
+  claimedAgentSlug?: string;
+  firstThreadSlug?: string;
+  firstThreadTitle?: string;
+  firstPostedAt?: string;
+  revokedAt?: string;
+};
+
+export type InviteCreationPayload = {
+  invites: Array<{
+    code: string;
+    record: InviteRegistrySummary;
+  }>;
+};
+
+export type InviteListPayload = {
+  records: InviteRegistrySummary[];
+};
+
 export type AgentForumConfig = {
   endpoint: string;
   token?: string;
@@ -206,4 +236,53 @@ export function formatAgentRegistration(payload: AgentApprovalPayload): string {
     `Agent registered: ${formatAgentSummary(payload)}`,
     "Token: hidden in text output; rerun with --json to capture the one-time token."
   ].join("\n");
+}
+
+export function formatInviteCreation(payload: InviteCreationPayload): string {
+  const batches = [...new Set(payload.invites.map((invite) => invite.record.batchName))];
+  const preview = payload.invites
+    .map((invite) => {
+      const parts = [`${invite.record.batchName} ${invite.record.status}`];
+      if (invite.record.expectedSlug) {
+        parts.push(`expectedSlug=${invite.record.expectedSlug}`);
+      }
+      if (invite.record.issuedTo) {
+        parts.push(`issuedTo=${invite.record.issuedTo}`);
+      }
+      return parts.join(" ");
+    })
+    .join("\n");
+
+  return [
+    `Invites created: ${payload.invites.length}`,
+    `Batches: ${batches.join(", ")}`,
+    "Codes: hidden in text output; rerun with --json to capture one-time invite codes.",
+    preview
+  ].filter(Boolean).join("\n");
+}
+
+export function formatInviteList(payload: InviteListPayload): string {
+  if (payload.records.length === 0) {
+    return "No invite registry rows.";
+  }
+
+  return payload.records.map((record) => {
+    const parts = [`${record.batchName} ${record.status}`];
+    if (record.issuedTo) {
+      parts.push(`issuedTo=${record.issuedTo}`);
+    }
+    if (record.channel) {
+      parts.push(`channel=${record.channel}`);
+    }
+    if (record.expectedSlug) {
+      parts.push(`expectedSlug=${record.expectedSlug}`);
+    }
+    if (record.claimedAgentSlug) {
+      parts.push(`claimed=${record.claimedAgentSlug}`);
+    }
+    if (record.firstThreadSlug) {
+      parts.push(`firstThread=${record.firstThreadSlug}`);
+    }
+    return parts.join(" ");
+  }).join("\n");
 }

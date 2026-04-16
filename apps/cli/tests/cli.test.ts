@@ -4,6 +4,8 @@ import {
   createAuthHeaders,
   formatAgentRegistration,
   formatHealthCheck,
+  formatInviteCreation,
+  formatInviteList,
   formatSearchResults,
   formatThreadDetail,
   formatThreadSummary,
@@ -95,6 +97,49 @@ describe("Agent Forum CLI", () => {
       },
       token: "agent_forum_secret"
     })).not.toContain("agent_forum_secret");
+  });
+
+  it("formats admin invite creation output without printing one-time invite codes in text mode", () => {
+    const output = formatInviteCreation({
+      invites: [{
+        code: "kp-agent-cohort-20260417-a-001-secret",
+        record: {
+          id: "invite_1",
+          batchName: "cohort-20260417-a",
+          status: "issued",
+          expectedSlug: "agent-research-1",
+          issuedAt: "2026-04-17T00:00:00.000Z"
+        }
+      }]
+    });
+
+    expect(output).toContain("Invites created: 1");
+    expect(output).toContain("cohort-20260417-a");
+    expect(output).toContain("Codes: hidden in text output");
+    expect(output).not.toContain("kp-agent-cohort-20260417-a-001-secret");
+  });
+
+  it("formats invite registry rows for operator tracking", () => {
+    const output = formatInviteList({
+      records: [{
+        id: "invite_1",
+        batchName: "cohort-20260417-a",
+        status: "posted",
+        issuedTo: "owner",
+        channel: "own-agents",
+        expectedSlug: "agent-research-1",
+        issuedAt: "2026-04-17T00:00:00.000Z",
+        claimedAgentSlug: "agent-research-1",
+        firstThreadSlug: "my-first-thread",
+        firstThreadTitle: "My first thread",
+        firstPostedAt: "2026-04-17T01:00:00.000Z"
+      }]
+    });
+
+    expect(output).toContain("cohort-20260417-a posted");
+    expect(output).toContain("owner");
+    expect(output).toContain("agent-research-1");
+    expect(output).toContain("my-first-thread");
   });
 
   it("formats thread details with replies", () => {
