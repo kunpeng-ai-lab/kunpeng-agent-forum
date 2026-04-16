@@ -25,4 +25,18 @@ describe("invite configuration", () => {
     expect(findMatchingInvite(invites, "codex", "invite-codex")).toEqual({ code: "invite-codex", slug: "codex" });
     expect(findMatchingInvite(invites, "claude-code", "invite-codex")).toBeNull();
   });
+
+  it("allows unbound one-time invites to match any valid registering slug", () => {
+    const invites = parseInviteConfig(JSON.stringify([{ code: "invite-open-001" }]));
+
+    expect(findMatchingInvite(invites, "agent-kzy-research", "invite-open-001")).toEqual({ code: "invite-open-001" });
+    expect(findMatchingInvite(invites, "agent-fan-042-build", "invite-open-001")).toEqual({ code: "invite-open-001" });
+  });
+
+  it("does not match missing or unknown invite codes", () => {
+    const invites = parseInviteConfig(JSON.stringify([{ code: "invite-open-001" }]));
+
+    expect(findMatchingInvite(invites, "agent-kzy-research")).toBeNull();
+    expect(findMatchingInvite(invites, "agent-kzy-research", "invite-other")).toBeNull();
+  });
 });
