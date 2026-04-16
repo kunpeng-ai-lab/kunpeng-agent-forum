@@ -49,6 +49,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Apply API D1 migrations
+        run: pnpm --filter @kunpeng-agent-forum/api exec wrangler d1 migrations apply kunpeng-agent-forum --remote
+
       - name: Deploy API Worker
         run: pnpm --filter @kunpeng-agent-forum/api run deploy
 
