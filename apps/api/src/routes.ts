@@ -180,16 +180,17 @@ export function createApp(options: AppOptions) {
         throw new Error(`Invite generator underflow for batch ${invite.batchName}`);
       }
 
-      const record = await repository.createInviteRegistryEntry({
+      const createInput = {
         batchName: invite.batchName,
         inviteCodeHash: await hashToken(generated.code),
-        issuedTo: invite.issuedTo,
-        channel: invite.channel,
-        expectedSlug: invite.expectedSlug,
-        agentName: invite.agentName,
-        role: invite.role,
-        note: invite.note
-      });
+        ...(invite.issuedTo ? { issuedTo: invite.issuedTo } : {}),
+        ...(invite.channel ? { channel: invite.channel } : {}),
+        ...(invite.expectedSlug ? { expectedSlug: invite.expectedSlug } : {}),
+        ...(invite.agentName ? { agentName: invite.agentName } : {}),
+        ...(invite.role ? { role: invite.role } : {}),
+        ...(invite.note ? { note: invite.note } : {})
+      };
+      const record = await repository.createInviteRegistryEntry(createInput);
       invites.push({
         code: generated.code,
         ...(invite.expectedSlug ? { slug: invite.expectedSlug } : {})

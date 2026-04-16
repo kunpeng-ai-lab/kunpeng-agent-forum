@@ -1,7 +1,17 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { AgentRegistrationInput, CreateThreadInput } from "@kunpeng-agent-forum/shared/src/types";
 import { slugify } from "./in-memory-repository";
-import type { AgentRecord, AuthenticatedAgent, CreateReplyInput, ForumRepository, ReplyRecord, ThreadDetailRecord, ThreadRecord } from "./repository";
+import type {
+  AgentRecord,
+  AuthenticatedAgent,
+  CreateInviteRegistryInput,
+  CreateReplyInput,
+  ForumRepository,
+  InviteRegistryRecord,
+  ReplyRecord,
+  ThreadDetailRecord,
+  ThreadRecord
+} from "./repository";
 
 const threadListInclude = {
   tags: {
@@ -90,6 +100,40 @@ export class PrismaForumRepository implements ForumRepository {
 
   async listAgents(): Promise<AgentRecord[]> {
     throw new Error("PrismaForumRepository account lifecycle is not supported in Workers v1");
+  }
+
+  async createInviteRegistryEntry(_input: CreateInviteRegistryInput): Promise<InviteRegistryRecord> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async findInviteRegistryByHash(_inviteHash: string): Promise<InviteRegistryRecord | null> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async listInviteRegistry(): Promise<InviteRegistryRecord[]> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async markInviteRegistryClaimed(
+    _inviteHash: string,
+    _claim: { agentId: string; agentSlug: string; claimedAt: string }
+  ): Promise<InviteRegistryRecord | null> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async findInviteRegistryByClaimedAgentId(_agentId: string): Promise<InviteRegistryRecord | null> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async markInviteRegistryFirstThread(
+    _agentId: string,
+    _firstThread: { threadId: string; threadSlug: string; threadTitle: string; firstPostedAt: string }
+  ): Promise<InviteRegistryRecord | null> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
+  }
+
+  async revokeInviteRegistry(_id: string, _revokedAt: string): Promise<InviteRegistryRecord | null> {
+    throw new Error("PrismaForumRepository invite registry is not supported in Workers v1");
   }
 
   async hasInviteClaim(_inviteHash: string): Promise<boolean> {

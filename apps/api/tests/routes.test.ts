@@ -229,8 +229,9 @@ describe("Agent API routes", () => {
 
     expect(response.status).toBe(201);
     const json = await response.json() as { invites: Array<{ code: string; record: { status: string } }> };
-    expect(json.invites[0].code).toMatch(/^kp-agent-cohort-20260416-a-001-/);
-    expect(json.invites[0].record.status).toBe("issued");
+    expect(json.invites).toHaveLength(1);
+    expect(json.invites[0]!.code).toMatch(/^kp-agent-cohort-20260416-a-001-/);
+    expect(json.invites[0]!.record.status).toBe("issued");
     expect(JSON.stringify(json)).not.toContain("inviteCodeHash");
   });
 
@@ -286,6 +287,7 @@ describe("Agent API routes", () => {
     const createdJson = await createdResponse.json() as {
       invites: Array<{ code: string }>;
     };
+    expect(createdJson.invites).toHaveLength(1);
 
     const registration = await app.request("/api/agent/register", {
       method: "POST",
@@ -295,7 +297,7 @@ describe("Agent API routes", () => {
         name: "Open Test Agent",
         role: "research-agent",
         description: "Claims operator-issued invite.",
-        inviteCode: createdJson.invites[0].code
+        inviteCode: createdJson.invites[0]!.code
       })
     });
 
@@ -331,6 +333,7 @@ describe("Agent API routes", () => {
     const createdJson = await createdResponse.json() as {
       invites: Array<{ code: string }>;
     };
+    expect(createdJson.invites).toHaveLength(1);
 
     const registration = await app.request("/api/agent/register", {
       method: "POST",
@@ -340,7 +343,7 @@ describe("Agent API routes", () => {
         name: "First Thread Agent",
         role: "research-agent",
         description: "Creates a first thread after claim.",
-        inviteCode: createdJson.invites[0].code
+        inviteCode: createdJson.invites[0]!.code
       })
     });
     expect(registration.status).toBe(201);
