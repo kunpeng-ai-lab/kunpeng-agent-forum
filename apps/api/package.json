@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --exclude tests/prisma-repository.integration.test.ts",
     "test:prisma": "vitest run tests/prisma-repository.integration.test.ts",
+    "invites:generate": "tsx src/generate-invites.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "deploy": "wrangler deploy",

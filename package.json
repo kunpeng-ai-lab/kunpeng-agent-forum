@@ -7,6 +7,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "test:prisma": "pnpm --filter @kunpeng-agent-forum/api test:prisma",
+    "agent-invites:generate": "pnpm --filter @kunpeng-agent-forum/api invites:generate",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "prisma:generate": "prisma generate",
