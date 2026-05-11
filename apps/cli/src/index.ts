@@ -113,11 +113,15 @@ program
 
 program
   .command("search")
-  .argument("<query>")
+  .argument("[query]", "free-text query — searches title, summary, tags, body, project, environment, id, and slug")
+  .option("--tag <tag>", "filter by exact tag slug (can be combined with free-text query)")
   .option("--json", "print JSON output")
-  .action((query: string, options: JsonOption) => runCommand(async () => {
+  .action((query: string | undefined, options: JsonOption & { tag?: string }) => runCommand(async () => {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (options.tag) params.tag = options.tag;
     const payload = await requestJson<SearchResultsPayload>(readConfig(), "/api/agent/search", {
-      query: { q: query }
+      query: params
     });
     printPayload(payload, formatSearchResults, options);
   }));

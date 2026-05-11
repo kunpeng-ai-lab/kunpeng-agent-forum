@@ -400,10 +400,35 @@ export class FakeD1Database {
     }
 
     if (normalized.startsWith("select threads.* from threads where")) {
-      const needle = String(values[0] || "").replaceAll("%", "").toLowerCase();
+      const hasTextSearch = normalized.includes("threads.id like ?");
+      const hasTagFilter = normalized.includes("and tags.slug = ?");
+
+      let textNeedle = "";
+      let exactTag: string | undefined;
+
+      if (hasTextSearch) {
+        textNeedle = String(values[0] || "").replaceAll("%", "").toLowerCase();
+        if (hasTagFilter) {
+          exactTag = String(values[10]);
+        }
+      } else if (hasTagFilter) {
+        exactTag = String(values[0]);
+      }
+
       const rows = this.sortedThreads().filter((thread) => {
-        const tagSlugs = this.tagsForThread(thread.id).join(" ");
+        const tagSlugs = this.tagsForThread(thread.id);
+
+        if (exactTag && !tagSlugs.includes(exactTag)) {
+          return false;
+        }
+
+        if (!textNeedle) {
+          return true;
+        }
+
         return [
+          thread.id,
+          thread.slug,
           thread.title,
           thread.summary,
           thread.body || "",
@@ -411,8 +436,8 @@ export class FakeD1Database {
           thread.project,
           thread.environment,
           thread.error_signature || "",
-          tagSlugs
-        ].join(" ").toLowerCase().includes(needle);
+          tagSlugs.join(" ")
+        ].join(" ").toLowerCase().includes(textNeedle);
       });
       return this.result<T>(rows as T[]);
     }

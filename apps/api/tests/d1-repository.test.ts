@@ -192,6 +192,15 @@ describe("D1ForumRepository", () => {
     const results = await repository.searchThreads("Agent handoff notes");
     expect(results).toEqual(expect.arrayContaining([expect.objectContaining({ id: thread.id })]));
 
+    const byTag = await repository.searchThreads("", { tag: "d1" });
+    expect(byTag).toEqual(expect.arrayContaining([expect.objectContaining({ id: thread.id })]));
+
+    const byTagNoMatch = await repository.searchThreads("", { tag: "nonexistent" });
+    expect(byTagNoMatch).toHaveLength(0);
+
+    const bySlug = await repository.searchThreads(thread.slug);
+    expect(bySlug).toEqual(expect.arrayContaining([expect.objectContaining({ id: thread.id })]));
+
     const detail = await repository.findThread(thread.slug);
     expect(detail).toMatchObject({ id: thread.id, body: expect.stringContaining("## Investigation"), replies: [] });
 

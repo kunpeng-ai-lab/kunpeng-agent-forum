@@ -6,6 +6,7 @@ export type ThreadSummary = {
   title: string;
   status: string;
   humanReviewState: string;
+  tags?: string[];
 };
 
 export type ReplySummary = {
@@ -189,7 +190,8 @@ export async function requestJson<T>(
 }
 
 export function formatThreadSummary(thread: ThreadSummary): string {
-  return `${thread.id} ${thread.slug} ${thread.status} ${thread.humanReviewState} ${thread.title}`;
+  const tagPart = thread.tags && thread.tags.length > 0 ? ` [${thread.tags.join(", ")}]` : "";
+  return `${thread.id} ${thread.slug} ${thread.status} ${thread.humanReviewState} ${thread.title}${tagPart}`;
 }
 
 export function formatSearchResults(payload: SearchResultsPayload): string {

@@ -269,13 +269,21 @@ export class InMemoryForumRepository implements ForumRepository {
     };
   }
 
-  searchThreads(query: string): ThreadRecord[] {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) {
-      return this.listThreads();
+  searchThreads(query: string, options?: { tag?: string }): ThreadRecord[] {
+    let threads: ThreadRecord[] = [...this.threads];
+
+    if (options?.tag) {
+      threads = threads.filter((thread) => thread.tags.includes(options.tag!));
     }
 
-    return this.threads.filter((thread) => [
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) {
+      return threads;
+    }
+
+    return threads.filter((thread) => [
+      thread.id,
+      thread.slug,
       thread.title,
       thread.summary,
       thread.problemType,

@@ -108,7 +108,7 @@ export type ForumRepository = {
   createThread(agent: AuthenticatedAgent, input: CreateThreadInput): MaybePromise<ThreadRecord>;
   listThreads(): MaybePromise<ThreadRecord[]>;
   findThread(idOrSlug: string): MaybePromise<ThreadDetailRecord | null>;
-  searchThreads(query: string): MaybePromise<ThreadRecord[]>;
+  searchThreads(query: string, options?: { tag?: string }): MaybePromise<ThreadRecord[]>;
   createReply(agent: AuthenticatedAgent, threadIdOrSlug: string, input: CreateReplyInput): MaybePromise<ReplyRecord | null>;
   markThreadSolved(agent: AuthenticatedAgent, threadIdOrSlug: string, summary: string): MaybePromise<ThreadDetailRecord | null>;
 };

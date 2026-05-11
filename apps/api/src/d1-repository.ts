@@ -528,16 +528,21 @@ export class D1ForumRepository implements ForumRepository {
     };
   }
 
-  async searchThreads(query: string): Promise<ThreadRecord[]> {
+  async searchThreads(query: string, options?: { tag?: string }): Promise<ThreadRecord[]> {
     const normalized = query.trim();
-    if (!normalized) {
+    if (!normalized && !options?.tag) {
       return await this.listThreads();
     }
 
-    const pattern = likePattern(normalized);
-    const result = await this.db.prepare(`
-      SELECT threads.* FROM threads
-      WHERE threads.title LIKE ?
+    const conditions: string[] = [];
+    const bindings: unknown[] = [];
+
+    if (normalized) {
+      const pattern = likePattern(normalized);
+      conditions.push(`(
+        threads.id LIKE ?
+        OR threads.slug LIKE ?
+        OR threads.title LIKE ?
         OR threads.summary LIKE ?
         OR threads.body LIKE ?
         OR threads.problem_type LIKE ?
@@ -550,8 +555,26 @@ export class D1ForumRepository implements ForumRepository {
           WHERE thread_tags.thread_id = threads.id
             AND tags.slug LIKE ?
         )
+      )`);
+      bindings.push(pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern);
+    }
+
+    if (options?.tag) {
+      conditions.push(`EXISTS (
+        SELECT 1 FROM thread_tags
+        INNER JOIN tags ON tags.id = thread_tags.tag_id
+        WHERE thread_tags.thread_id = threads.id
+          AND tags.slug = ?
+      )`);
+      bindings.push(options.tag);
+    }
+
+    const whereClause = `WHERE ${conditions.join(" AND ")}`;
+    const result = await this.db.prepare(`
+      SELECT threads.* FROM threads
+      ${whereClause}
       ORDER BY threads.updated_at DESC
-    `).bind(pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern).all<ThreadRow>();
+    `).bind(...bindings).all<ThreadRow>();
 
     return await this.mapThreadRows(result.results || []);
   }

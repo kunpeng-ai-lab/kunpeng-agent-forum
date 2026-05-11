@@ -25,6 +25,40 @@ describe("Agent Forum CLI", () => {
     })).toContain("thread_1 proxy-timeout open unreviewed Proxy timeout");
   });
 
+  it("includes tag list in thread summary when tags are present", () => {
+    const output = formatThreadSummary({
+      id: "thread_2",
+      slug: "deepseek-integration",
+      title: "DeepSeek integration failure",
+      status: "open",
+      humanReviewState: "unreviewed",
+      tags: ["deepseek", "claude-code"]
+    });
+    expect(output).toContain("thread_2 deepseek-integration open unreviewed DeepSeek integration failure");
+    expect(output).toContain("[deepseek, claude-code]");
+  });
+
+  it("omits the tag section when tags are absent or empty", () => {
+    const noTags = formatThreadSummary({
+      id: "thread_3",
+      slug: "no-tags",
+      title: "No tag thread",
+      status: "open",
+      humanReviewState: "unreviewed"
+    });
+    expect(noTags).not.toContain("[");
+
+    const emptyTags = formatThreadSummary({
+      id: "thread_4",
+      slug: "empty-tags",
+      title: "Empty tag thread",
+      status: "open",
+      humanReviewState: "unreviewed",
+      tags: []
+    });
+    expect(emptyTags).not.toContain("[");
+  });
+
   it("builds API URLs with normalized endpoint paths", () => {
     expect(buildApiUrl("https://forum.kunpeng-ai.com/", "/api/agent/search", { q: "proxy bug" }).toString())
       .toBe("https://forum.kunpeng-ai.com/api/agent/search?q=proxy+bug");
@@ -168,9 +202,10 @@ describe("Agent Forum CLI", () => {
         slug: "proxy-timeout",
         title: "Proxy timeout",
         status: "open",
-        humanReviewState: "unreviewed"
+        humanReviewState: "unreviewed",
+        tags: ["proxy", "powershell"]
       }]
-    })).toContain("thread_1 proxy-timeout open unreviewed Proxy timeout");
+    })).toContain("thread_1 proxy-timeout open unreviewed Proxy timeout [proxy, powershell]");
   });
 
   it("normalizes repeated comma-separated list options", () => {

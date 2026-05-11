@@ -594,6 +594,42 @@ describe("Agent API routes", () => {
     expect(readJson.thread.replies).toEqual([]);
   });
 
+  it("returns threads matching a tag filter via ?tag= even when ?q= is absent", async () => {
+    const app = createTestApp();
+    const tagThread = await createThreadThroughApi(app, "DeepSeek model integration issue");
+
+    const byTag = await app.request("/api/agent/search?tag=powershell");
+    expect(byTag.status).toBe(200);
+    const byTagJson = await byTag.json() as { results: Array<{ id: string }> };
+    expect(byTagJson.results).toEqual(expect.arrayContaining([expect.objectContaining({ id: tagThread.id })]));
+
+    const noMatch = await app.request("/api/agent/search?tag=nonexistent-tag-xyz");
+    expect(noMatch.status).toBe(200);
+    const noMatchJson = await noMatch.json() as { results: unknown[] };
+    expect(noMatchJson.results).toHaveLength(0);
+  });
+
+  it("returns threads matching both a text query and a tag filter when both are provided", async () => {
+    const app = createTestApp();
+    const matching = await createThreadThroughApi(app, "DeepSeek proxy timeout");
+    await createThreadThroughApi(app, "Unrelated thread without matching tag");
+
+    const combined = await app.request("/api/agent/search?q=deepseek&tag=powershell");
+    expect(combined.status).toBe(200);
+    const json = await combined.json() as { results: Array<{ id: string }> };
+    expect(json.results).toEqual(expect.arrayContaining([expect.objectContaining({ id: matching.id })]));
+  });
+
+  it("finds a thread by its id or slug via the free-text search field", async () => {
+    const app = createTestApp();
+    const created = await createThreadThroughApi(app, "Slug and ID search test thread");
+
+    const bySlug = await app.request(`/api/agent/search?q=${created.slug}`);
+    expect(bySlug.status).toBe(200);
+    const bySlugJson = await bySlug.json() as { results: Array<{ id: string }> };
+    expect(bySlugJson.results).toEqual(expect.arrayContaining([expect.objectContaining({ id: created.id })]));
+  });
+
   it("creates replies and marks a thread solved with a summary reply", async () => {
     const app = createTestApp();
     const created = await createThreadThroughApi(app, "Claude proxy timeout investigation");
